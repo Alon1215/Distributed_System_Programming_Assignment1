@@ -6,6 +6,9 @@ import java.io.File;  // Import the File class
 import java.io.FileNotFoundException;  // Import this class to handle errors
 import java.io.IOException;
 import java.net.MalformedURLException;
+
+import net.sourceforge.tess4j.Tesseract;
+import net.sourceforge.tess4j.TesseractException;
 import org.apache.commons.io.FileUtils;
 
 import java.net.URISyntaxException;
@@ -31,7 +34,6 @@ public class Main {
             File inputFile = new File("text.images.txt");
             Scanner myReader = new Scanner(inputFile);
 
-            Ocr.setUp(); // one time setup
 
             while (myReader.hasNextLine()) {
                 String data = myReader.nextLine();
@@ -52,19 +54,24 @@ public class Main {
 
     public static void img2TxtDemo(String url) throws MalformedURLException, URISyntaxException {
 
-        Ocr ocr = new Ocr(); // create a new OCR engine
+        Tesseract tesseract = new Tesseract();
+        tesseract.setDatapath("tessdata-master");
         URL url_IMG = new URL(url);
-        File ne = new File("download");
+        String[] arr = url.split("/");
+        File ne = new File(arr[arr.length - 1]);
         try {
             FileUtils.copyURLToFile(url_IMG, ne);
         } catch (IOException e) {
+//            e.printStackTrace();
+            System.out.println("Image not fund");
+        }
+        String s = null;
+        try {
+            s = tesseract.doOCR(ne);
+        } catch (TesseractException e) {
             e.printStackTrace();
         }
-        ocr.startEngine("eng", Ocr.SPEED_FASTEST); // English
-        String s = ocr.recognize(new File[] {(ne)},
-                Ocr.RECOGNIZE_TYPE_ALL, Ocr.OUTPUT_FORMAT_PLAINTEXT); // PLAINTEXT | XML | PDF | RTF
         System.out.println("Result: " + s);
-        ocr.stopEngine();
 
 
     }
