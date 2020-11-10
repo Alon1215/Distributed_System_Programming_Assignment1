@@ -17,7 +17,7 @@ public class local {
 
 
     public static void main(String[] args) {
-        Ec2Client client;
+        EC2 client = new EC2();
 
     // 1. Check if manager node is active (if not, initiate)
         // create new if doesn't exist, else return current one

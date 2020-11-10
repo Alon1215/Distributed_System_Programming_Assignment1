@@ -1,4 +1,5 @@
 package Local;
+import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.ec2.Ec2Client;
 import software.amazon.awssdk.services.ec2.model.InstanceType;
 import software.amazon.awssdk.services.ec2.model.RunInstancesRequest;
@@ -16,25 +17,29 @@ public class EC2 {
     }
 
     public void createInstance(){
+        client = Ec2Client.builder()
+                .region(Region.US_EAST_1)
+                .build();
+
         final String USAGE =
                 "To run this example, supply an instance name and AMI image id\n" +
                         "Both values can be obtained from the AWS Console\n" +
                         "Ex: CreateInstance <instance-name> <ami-image-id>\n";
 
-        String name = "";
-        String amiId = "";
+        String name = "Manager";
+        String amiId = "ami-0947d2ba12ee1ff75";
 
         // snippet-start:[ec2.java2.create_instance.main]
-        Ec2Client ec2 = Ec2Client.create();
+        client = Ec2Client.create();
 
         RunInstancesRequest runRequest = RunInstancesRequest.builder()
-                .instanceType(InstanceType.T1_MICRO)
+                .instanceType(InstanceType.T2_MICRO)
                 .imageId(amiId)
                 .maxCount(1)
                 .minCount(1)
                 .userData(Base64.getEncoder().encodeToString(USAGE.getBytes())).build();
 
-        RunInstancesResponse response = ec2.runInstances(runRequest);
+        RunInstancesResponse response = client.runInstances(runRequest);
 
         String instanceId = response.instances().get(0).instanceId();
 
@@ -49,7 +54,7 @@ public class EC2 {
                 .build();
 
         try {
-            ec2.createTags(tagRequest);
+            client.createTags(tagRequest);
             System.out.printf(
                     "Successfully started EC2 instance %s based on AMI %s",
                     instanceId, amiId);
