@@ -57,8 +57,7 @@ public class Main {
         Tesseract tesseract = new Tesseract();
         tesseract.setDatapath("tessdata-master");
         URL url_IMG = new URL(url);
-        String[] arr = url.split("/");
-        File ne = new File(arr[arr.length - 1]);
+        File ne = new File(Paths.get(url_IMG.getPath()).getFileName().toString());
         try {
             FileUtils.copyURLToFile(url_IMG, ne);
         } catch (IOException e) {
