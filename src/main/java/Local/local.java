@@ -1,4 +1,14 @@
 package Local;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.ec2.Ec2Client;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.CreateBucketConfiguration;
+import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
+import software.amazon.awssdk.services.s3.model.ObjectCannedACL;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.sqs.SqsClient;
+import software.amazon.awssdk.services.sqs.model.*;
 
 import software.amazon.awssdk.services.s3.S3Client;
 
@@ -7,9 +17,9 @@ public class local {
 
 
     public static void main(String[] args) {
+        Ec2Client client;
 
     // 1. Check if manager node is active (if not, initiate)
-        CreateInstance newEC2 = new CreateInstance();
         // create new if doesn't exist, else return current one
         // check which parameters are needed
 
