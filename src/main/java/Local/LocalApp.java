@@ -1,6 +1,9 @@
+package Local;
+
 import com.asprise.ocr.Ocr;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;  // Import the File class
 import java.io.FileNotFoundException;  // Import this class to handle errors
@@ -17,7 +20,7 @@ import java.nio.file.Paths;
 import java.util.Scanner; // Import the Scanner class to read text files
 
 
-public class Main {
+public class LocalApp {
 
     public static void main(String[] args) {
         System.out.println("Start->");
@@ -45,30 +48,43 @@ public class Main {
         } catch (FileNotFoundException e) {
             System.out.println("input file: No file found, program terminates.");
             e.printStackTrace();
-        }  catch (URISyntaxException e) {
-            e.printStackTrace();
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
     }
+    public static BufferedImage toBufferedImage(Image img) {
+        if (img instanceof BufferedImage) {
+            return (BufferedImage) img;
+        }
+    // Create a buffered image with transparency
+    BufferedImage bimage = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
 
-    public static void img2TxtDemo(String url) throws MalformedURLException, URISyntaxException {
+    // Draw the image on to the buffered image
+    Graphics2D bGr = bimage.createGraphics();
+        bGr.drawImage(img, 0, 0, null);
+        bGr.dispose();
+
+    // Return the buffered image
+        return bimage;
+}
+    public static void img2TxtDemo(String url) throws MalformedURLException {
 
         Tesseract tesseract = new Tesseract();
         tesseract.setDatapath("tessdata-master");
         URL url_IMG = new URL(url);
-        File ne = new File(Paths.get(url_IMG.getPath()).getFileName().toString());
+        Image image = null;
         try {
-            FileUtils.copyURLToFile(url_IMG, ne);
+             image = ImageIO.read(url_IMG);
         } catch (IOException e) {
-//            e.printStackTrace();
-            System.out.println("Image not fund");
+            System.out.println("Image not found");
         }
         String s = null;
         try {
-            s = tesseract.doOCR(ne);
+            if(image == null)
+                return;
+            s = tesseract.doOCR(toBufferedImage(image));
         } catch (TesseractException e) {
-            e.printStackTrace();
+            System.out.println("Test");
         }
         System.out.println("Result: " + s);
 
