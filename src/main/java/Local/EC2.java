@@ -1,12 +1,7 @@
 package Local;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.ec2.Ec2Client;
-import software.amazon.awssdk.services.ec2.model.InstanceType;
-import software.amazon.awssdk.services.ec2.model.RunInstancesRequest;
-import software.amazon.awssdk.services.ec2.model.RunInstancesResponse;
-import software.amazon.awssdk.services.ec2.model.Tag;
-import software.amazon.awssdk.services.ec2.model.CreateTagsRequest;
-import software.amazon.awssdk.services.ec2.model.Ec2Exception;
+import software.amazon.awssdk.services.ec2.model.*;
 
 import java.util.Base64;
 
@@ -27,10 +22,10 @@ public class EC2 {
                         "Ex: CreateInstance <instance-name> <ami-image-id>\n";
 
         String name = "Manager";
-        String amiId = "ami-0947d2ba12ee1ff75";
+        String amiId = "ami-076515f20540e6e0b";
 
         // snippet-start:[ec2.java2.create_instance.main]
-        client = Ec2Client.create();
+      //  client = Ec2Client.create();
 
         RunInstancesRequest runRequest = RunInstancesRequest.builder()
                 .instanceType(InstanceType.T2_MICRO)
@@ -40,7 +35,6 @@ public class EC2 {
                 .userData(Base64.getEncoder().encodeToString(USAGE.getBytes())).build();
 
         RunInstancesResponse response = client.runInstances(runRequest);
-
         String instanceId = response.instances().get(0).instanceId();
 
         Tag tag = Tag.builder()
