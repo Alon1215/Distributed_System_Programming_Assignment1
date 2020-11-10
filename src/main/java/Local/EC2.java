@@ -4,15 +4,38 @@ import software.amazon.awssdk.services.ec2.Ec2Client;
 import software.amazon.awssdk.services.ec2.model.*;
 
 import java.util.Base64;
-
 public class EC2 {
-    Ec2Client client = null;
-    EC2(){
-        createInstance();
+    Ec2Client ec2 = null;
+    public EC2(){
+        boolean isExist = checkIfManagerExist();
+        if (!isExist){
+            createInstance();
+        }
+    }
+
+    private boolean checkIfManagerExist() {
+        Tag tag = Tag.builder()
+                .key("Name")
+                .value("Manager")
+                .build();
+
+        CreateTagsRequest tagRequest = CreateTagsRequest.builder()
+                .tags(tag)
+                .build();
+
+        try {
+            ec2.createTags(tagRequest);
+            System.out.println("Manager already exist");
+            return true;
+
+        } catch (Ec2Exception e) {
+            System.out.println("Manager doesn't exist yet");
+            return false;
+        }
     }
 
     public void createInstance(){
-        client = Ec2Client.builder()
+        ec2 = Ec2Client.builder()
                 .region(Region.US_EAST_1)
                 .build();
 
@@ -34,7 +57,7 @@ public class EC2 {
                 .minCount(1)
                 .userData(Base64.getEncoder().encodeToString(USAGE.getBytes())).build();
 
-        RunInstancesResponse response = client.runInstances(runRequest);
+        RunInstancesResponse response = ec2.runInstances(runRequest);
         String instanceId = response.instances().get(0).instanceId();
 
         Tag tag = Tag.builder()
@@ -48,7 +71,7 @@ public class EC2 {
                 .build();
 
         try {
-            client.createTags(tagRequest);
+            ec2.createTags(tagRequest);
             System.out.printf(
                     "Successfully started EC2 instance %s based on AMI %s",
                     instanceId, amiId);
