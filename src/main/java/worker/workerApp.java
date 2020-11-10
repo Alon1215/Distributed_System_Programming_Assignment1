@@ -1,4 +1,4 @@
-package Local;
+package worker;
 
 import com.asprise.ocr.Ocr;
 
@@ -20,7 +20,7 @@ import java.nio.file.Paths;
 import java.util.Scanner; // Import the Scanner class to read text files
 
 
-public class LocalApp {
+public class workerApp {
 
     public static void main(String[] args) {
         System.out.println("Start->");
