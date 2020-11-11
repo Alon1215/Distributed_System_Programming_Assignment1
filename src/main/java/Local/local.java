@@ -44,7 +44,9 @@ public class local {
         System.out.println(fileS3Address);
 
     // 3. Sends a message to an SQS queue, stating the location of the file on S3
-
+        // 3.1 create SQS for local2manager & manager2local
+        SQS sqsL2M = new SQS("local2manager");
+        SQS sqsM2L = new SQS("local2manager");
     // 4. Checks an SQS queue for a message indicating the process is done and the response (the summary file) is available on S3.
 
             // 4.1 Downloads the summary file from S3, and create an html file representing the results.
