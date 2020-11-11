@@ -14,13 +14,18 @@ import software.amazon.awssdk.services.sqs.model.*;
 import software.amazon.awssdk.services.s3.S3Client;
 
 public class local {
-    private static Region region;
-    private final String inputFile = "text.images.txt";
-    private final String outputFile = "Output.html";
 
 
     public static void main(String[] args) {
 
+        if (args.length < 3){
+            System.out.println("To few arguments, program terminate");
+            System.exit(1);
+        }
+//        Region region;
+        String inputFile = args[0];
+        String outputFile = args[1];
+        int n = Integer.parseInt(args[2]);
 
     // 1. Check if manager node is active (if not, initiate)
         EC2 newEC2 = new EC2(); // create new if doesn't exist, else return current one
@@ -31,15 +36,11 @@ public class local {
 
     // 2. Upload input file to S3
         S3Controller s3 = new S3Controller();
+        s3.createNewBucket();
+        String fileS3Address = s3.putInputInBucket(args[0]); // TODO: Alon 13:00: should it return the address?
 
 
-        //       S3Client s3Cli = S3Client.builder().region(region).build();
-
-          //  String bucket = "bucket" + System.currentTimeMillis();
-         //   String key = "key";
-
-            //createBucket(bucket, region);
-        // 3. Sends a message to an SQS queue, stating the location of the file on S3
+    // 3. Sends a message to an SQS queue, stating the location of the file on S3
 
     // 4. Checks an SQS queue for a message indicating the process is done and the response (the summary file) is available on S3.
 
