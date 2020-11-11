@@ -10,6 +10,7 @@ public class EC2 {
     Ec2Client ec2 = null;
     String name = "Manager";
     String amiId = "ami-076515f20540e6e0b";
+    String instanceId;
 
     public EC2(){
         ec2 = Ec2Client.builder()
@@ -36,11 +37,13 @@ public class EC2 {
             List<Instance> instanceList = reservation.instances();
             //Now on each instance you can call
             for (Instance instance : instanceList) {
-                if (instance.state().name() != InstanceStateName.TERMINATED) {
+                if (instance.state().name() != InstanceStateName.TERMINATED) { // @TODO: Alon 12:00 : why not RUNNING?
                     List<Tag> tags = instance.tags();
                     for (Tag tag : tags) {
-                        if (tag.value().equals(name))
+                        if (tag.value().equals(name)){
+                            this.instanceId = instance.instanceId(); // @TODO: Alon 12:00 : update field to running manager's Id
                             return true;
+                        }
                     }
                 }
             }
@@ -67,7 +70,9 @@ public class EC2 {
                 .userData(Base64.getEncoder().encodeToString(USAGE.getBytes())).build();
 
         RunInstancesResponse response = ec2.runInstances(runRequest);
-        String instanceId = response.instances().get(0).instanceId();
+
+//        String instanceId = response.instances().get(0).instanceId();
+        this.instanceId = response.instances().get(0).instanceId(); // @TODO: Alon 12:00 : stated ID as a field (instead of local)
 
         Tag tag = Tag.builder()
                 .key("Name")

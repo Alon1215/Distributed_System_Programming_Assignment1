@@ -30,8 +30,10 @@ public class local {
 
 
     // 2. Upload input file to S3
+        S3Controller s3 = new S3Controller();
 
-         //       S3Client s3Cli = S3Client.builder().region(region).build();
+
+        //       S3Client s3Cli = S3Client.builder().region(region).build();
 
           //  String bucket = "bucket" + System.currentTimeMillis();
          //   String key = "key";

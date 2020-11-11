@@ -18,6 +18,7 @@ package Local;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Random;
 import software.amazon.awssdk.regions.Region;
@@ -41,9 +42,12 @@ import software.amazon.awssdk.services.s3.paginators.ListObjectsV2Iterable;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.core.sync.ResponseTransformer;
 
-public class S3Operations {
+public class S3Controller {
 
-    private static S3Client s3;
+    private static S3Client s3 = S3Client.builder().region(Region.US_WEST_2).build();
+    private String bucketName; // @TODO: Alon 12:00 : added field
+    private String bucketKey; // @TODO: Alon 12:00 : added field
+    private final Region region = Region.US_WEST_2;  // @TODO: Alon 12:00 : added field
 
     public static void main(String[] args) throws IOException {
         Region region = Region.US_WEST_2;
@@ -184,5 +188,64 @@ public class S3Operations {
         byte[] b = new byte[size];
         new Random().nextBytes(b);
         return ByteBuffer.wrap(b);
+    }
+
+
+
+                                // ------------------- Alon 12:00 added functions  ------------------- //
+    public String createNewBucket(){
+        this.bucketName = "bucket" + System.currentTimeMillis();
+        this.bucketKey = "key" + System.currentTimeMillis();
+
+        s3.createBucket(CreateBucketRequest
+                .builder()
+                .bucket(bucketName)
+                .createBucketConfiguration(
+                        CreateBucketConfiguration.builder()
+                                .locationConstraint(region.id())
+                                .build())
+                .build());
+
+
+        return this.bucketName;
+    }
+
+    /**
+     * put input text file of the assignment in the created bucket.
+     * @param path indicates file current path
+     * @return url address of the uploaded file in s3 storage
+     */
+    public String putInputInBucket(String path){
+        String uploadedURL = ""; // needed?
+
+        // convert path to file / byte buffer
+        byte[] bytes;
+        try {
+            bytes = Files.readAllBytes(Paths.get(path));
+        } catch (IOException e) {
+            //e.printStackTrace();
+            System.out.println("Input file not found");
+            return "ERROR";
+        }
+        ByteBuffer buffer = ByteBuffer.wrap(bytes);
+
+        // Put Object
+        s3.putObject(PutObjectRequest.builder().bucket(this.bucketName).key(this.bucketKey)
+                        .build(),
+                RequestBody.fromByteBuffer(buffer));
+
+        return uploadedURL; // @TODO: Alon 13:00 : should it return file's address?
+    }
+
+    public boolean deleteCurrBucket() {
+        if (!bucketName.equals("")) {
+            DeleteBucketRequest deleteBucketRequest = DeleteBucketRequest.builder().bucket(this.bucketName).build();
+            s3.deleteBucket(deleteBucketRequest);
+
+            this.bucketName = "";
+            this.bucketKey = "";
+            return true;
+        }
+        return false;
     }
 }
