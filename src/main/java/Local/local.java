@@ -28,7 +28,7 @@ public class local {
         int n = Integer.parseInt(args[2]);
 
     // 1. Check if manager node is active (if not, initiate)
-        EC2 newEC2 = new EC2(); // create new if doesn't exist, else return current one
+        EC2 newEC2 = new EC2(); // create new manager if doesn't exist, else represents current one
 
         // check which parameters are needed
 
