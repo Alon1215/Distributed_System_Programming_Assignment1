@@ -4,48 +4,57 @@ import software.amazon.awssdk.services.ec2.Ec2Client;
 import software.amazon.awssdk.services.ec2.model.*;
 
 import java.util.Base64;
+import java.util.List;
+
 public class EC2 {
     Ec2Client ec2 = null;
+    String name = "Manager";
+    String amiId = "ami-076515f20540e6e0b";
+
     public EC2(){
-        boolean isExist = checkIfManagerExist();
-        if (!isExist){
-            createInstance();
-        }
-    }
-
-    private boolean checkIfManagerExist() {
-        Tag tag = Tag.builder()
-                .key("Name")
-                .value("Manager")
-                .build();
-
-        CreateTagsRequest tagRequest = CreateTagsRequest.builder()
-                .tags(tag)
-                .build();
-
-        try {
-            ec2.createTags(tagRequest);
-            System.out.println("Manager already exist");
-            return true;
-
-        } catch (Ec2Exception e) {
-            System.out.println("Manager doesn't exist yet");
-            return false;
-        }
-    }
-
-    public void createInstance(){
         ec2 = Ec2Client.builder()
                 .region(Region.US_EAST_1)
                 .build();
+
+        boolean isExist = checkIfManagerExist();
+            if (!isExist) {
+                createInstance();
+                System.out.println("Finished making a Manager");
+
+            }
+            else{
+                System.out.println("Manager already exist");
+            }
+    }
+
+    private boolean checkIfManagerExist() {
+
+        List<Reservation> reservList = ec2.describeInstances().reservations();
+
+        //iterate on reservList and call
+        for (Reservation reservation : reservList) {
+            List<Instance> instanceList = reservation.instances();
+            //Now on each instance you can call
+            for (Instance instance : instanceList) {
+                if (instance.state().name() != InstanceStateName.TERMINATED) {
+                    List<Tag> tags = instance.tags();
+                    for (Tag tag : tags) {
+                        if (tag.value().equals(name))
+                            return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    public void createInstance(){
 
         final String USAGE =
                 "To run this example, supply an instance name and AMI image id\n" +
                         "Both values can be obtained from the AWS Console\n" +
                         "Ex: CreateInstance <instance-name> <ami-image-id>\n";
 
-        String name = "Manager";
-        String amiId = "ami-076515f20540e6e0b";
 
         // snippet-start:[ec2.java2.create_instance.main]
       //  client = Ec2Client.create();

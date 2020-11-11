@@ -31,12 +31,12 @@ public class local {
 
     // 2. Upload input file to S3
 
-                S3Client s3Cli = S3Client.builder().region(region).build();
+         //       S3Client s3Cli = S3Client.builder().region(region).build();
 
-            String bucket = "bucket" + System.currentTimeMillis();
-            String key = "key";
+          //  String bucket = "bucket" + System.currentTimeMillis();
+         //   String key = "key";
 
-            createBucket(bucket, region);
+            //createBucket(bucket, region);
         // 3. Sends a message to an SQS queue, stating the location of the file on S3
 
     // 4. Checks an SQS queue for a message indicating the process is done and the response (the summary file) is available on S3.
