@@ -40,8 +40,8 @@ public class local {
     // 2. Upload input file to S3
         S3Controller s3 = new S3Controller();
         s3.createNewBucket();
-        String fileS3Address = s3.putInputInBucket(inputFile); // TODO: Alon 13:00: should it return the address?
-
+        String fileS3Address = s3.putInputInBucket(inputFile, "inputFile"); // TODO: Alon 13:00: should it return the address?
+        System.out.println(fileS3Address);
 
     // 3. Sends a message to an SQS queue, stating the location of the file on S3
 

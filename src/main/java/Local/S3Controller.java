@@ -44,13 +44,13 @@ import software.amazon.awssdk.core.sync.ResponseTransformer;
 
 public class S3Controller {
 
-    private static S3Client s3 = S3Client.builder().region(Region.US_WEST_2).build();
+    private static S3Client s3 = S3Client.builder().region(Region.US_EAST_1).build();
     private String bucketName; // @TODO: Alon 12:00 : added field
     private String bucketKey; // @TODO: Alon 12:00 : added field
-    private final Region region = Region.US_WEST_2;  // @TODO: Alon 12:00 : added field
+    private final Region region = Region.US_EAST_1;  // @TODO: Alon 12:00 : added field
 
     public static void main(String[] args) throws IOException {
-        Region region = Region.US_WEST_2;
+        Region region = Region.US_EAST_1;
         s3 = S3Client.builder().region(region).build();
 
 
@@ -195,14 +195,12 @@ public class S3Controller {
                                 // ------------------- Alon 12:00 added functions  ------------------- //
     public String createNewBucket(){
         this.bucketName = "bucket" + System.currentTimeMillis();
-        this.bucketKey = "key" + System.currentTimeMillis();
 
         s3.createBucket(CreateBucketRequest
                 .builder()
                 .bucket(bucketName)
                 .createBucketConfiguration(
                         CreateBucketConfiguration.builder()
-                                .locationConstraint(region.id())
                                 .build())
                 .build());
 
@@ -215,8 +213,9 @@ public class S3Controller {
      * @param path indicates file current path
      * @return url address of the uploaded file in s3 storage
      */
-    public String putInputInBucket(String path){
+    public String putInputInBucket(String path, String key){
         String uploadedURL = ""; // needed?
+        this.bucketKey = key + System.currentTimeMillis();
 
         // convert path to file / byte buffer
         byte[] bytes;
