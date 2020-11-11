@@ -18,6 +18,7 @@ public class local {
 
     public static void main(String[] args) {
 
+        /*
         if (args.length < 3){
             System.out.println("To few arguments, program terminate");
             System.exit(1);
@@ -26,9 +27,11 @@ public class local {
         String inputFile = args[0];
         String outputFile = args[1];
         int n = Integer.parseInt(args[2]);
+        */
+        String inputFile = "text.images.txt";
 
     // 1. Check if manager node is active (if not, initiate)
-        EC2 newEC2 = new EC2(); // create new manager if doesn't exist, else represents current one
+        //EC2 newEC2 = new EC2(); // create new manager if doesn't exist, else represents current one
 
         // check which parameters are needed
 
@@ -37,7 +40,7 @@ public class local {
     // 2. Upload input file to S3
         S3Controller s3 = new S3Controller();
         s3.createNewBucket();
-        String fileS3Address = s3.putInputInBucket(args[0]); // TODO: Alon 13:00: should it return the address?
+        String fileS3Address = s3.putInputInBucket(inputFile); // TODO: Alon 13:00: should it return the address?
 
 
     // 3. Sends a message to an SQS queue, stating the location of the file on S3
