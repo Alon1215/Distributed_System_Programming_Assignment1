@@ -1,29 +1,15 @@
 package Local;
-import software.amazon.awssdk.core.sync.RequestBody;
-import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.services.ec2.Ec2Client;
-import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.S3ClientBuilder;
-import software.amazon.awssdk.services.s3.model.CreateBucketConfiguration;
-import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
-import software.amazon.awssdk.services.s3.model.ObjectCannedACL;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
-import software.amazon.awssdk.services.sqs.SqsClient;
-import software.amazon.awssdk.services.sqs.model.*;
-
-import software.amazon.awssdk.services.s3.S3Client;
 
 public class local {
 
-
     public static void main(String[] args) {
-
+        final String LOCAL_NAME = "local" + System.currentTimeMillis();
         /*
         if (args.length < 3){
             System.out.println("To few arguments, program terminate");
             System.exit(1);
         }
-//        Region region;
+        Region region;
         String inputFile = args[0];
         String outputFile = args[1];
         int n = Integer.parseInt(args[2]);
@@ -31,6 +17,7 @@ public class local {
         String inputFile = "text.images.txt";
 
     // 1. Check if manager node is active (if not, initiate)
+
         //EC2 newEC2 = new EC2(); // create new manager if doesn't exist, else represents current one
 
         // check which parameters are needed
@@ -45,8 +32,8 @@ public class local {
 
     // 3. Sends a message to an SQS queue, stating the location of the file on S3
         // 3.1 create SQS for local2manager & manager2local
-        SQS sqsL2M = new SQS("local2manager");
-        SQS sqsM2L = new SQS("local2manager");
+        SQSController sqsLocal = new SQSController(LOCAL_NAME);
+        String sqsM2L = new SQSController("manager2local");
     // 4. Checks an SQS queue for a message indicating the process is done and the response (the summary file) is available on S3.
 
             // 4.1 Downloads the summary file from S3, and create an html file representing the results.

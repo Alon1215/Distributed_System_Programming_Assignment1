@@ -1,6 +1,4 @@
-package worker;
-
-import com.asprise.ocr.Ocr;
+package Worker;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -12,11 +10,8 @@ import java.net.MalformedURLException;
 
 import net.sourceforge.tess4j.Tesseract;
 import net.sourceforge.tess4j.TesseractException;
-import org.apache.commons.io.FileUtils;
 
-import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Paths;
 import java.util.Scanner; // Import the Scanner class to read text files
 
 

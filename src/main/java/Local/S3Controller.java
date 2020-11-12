@@ -237,12 +237,6 @@ public class S3Controller {
     }
 
     public boolean deleteCurrBucket() {
-
-
-        this.bucketKey = "";
-
-    }
-    public boolean deleteCurrBucket() {
         if (!bucketName.equals("")) {
             DeleteBucketRequest deleteBucketRequest = DeleteBucketRequest.builder().bucket(this.bucketName).build();
             s3.deleteBucket(deleteBucketRequest);

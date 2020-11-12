@@ -17,11 +17,11 @@ import software.amazon.awssdk.regions.Region;
 
 import java.awt.*;
 
-public class SQS {
+public class SQSController {
     public SqsClient sqs;
     final private String queueURL;
 
-    public SQS(String sqsName){
+    public SQSController(String sqsName){
         sqs = SqsClient.builder()
                 .region(Region.US_EAST_1)
                 .build();
@@ -67,4 +67,12 @@ public class SQS {
         }
     }
 
+
+    // TODO: Alon 12.11 17:00: added
+    public String getQueueURL(String sqsName) {
+        GetQueueUrlRequest getQueueRequest = GetQueueUrlRequest.builder()
+                .queueName(sqsName)
+                .build();
+        return sqs.getQueueUrl(getQueueRequest).queueUrl();
+    }
 }
