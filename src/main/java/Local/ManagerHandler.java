@@ -105,16 +105,13 @@ public class ManagerHandler {
                     "Successfully started EC2 instance %s based on AMI %s",
                     instanceId, amiId);
 
-            // TODO: ALON 14.11:
-            this.sqs = new SQSController("Manager");
-            this.sqsURL = sqs.getQueueURL();
-            // ----
+            this.sqs = new SQSController();
+            this.sqsURL = this.sqs.createQueue("Manager");
 
         } catch (Ec2Exception e) {
             System.err.println(e.getMessage());
             System.exit(1);
         }
-        // snippet-end:[ec2.java2.create_instance.main]
         System.out.println("Done!");
     }
 

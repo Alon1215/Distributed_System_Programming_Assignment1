@@ -21,7 +21,7 @@ public class SQSController {
     public SqsClient sqs;
     private String queueURL;
 
-    public SQSController(String sqsName){
+    public SQSController(){
         sqs = SqsClient.builder()
                 .region(Region.US_EAST_1)
                 .build();
@@ -49,7 +49,7 @@ public class SQSController {
         sqs.sendMessage(send_msg_request);
     }
 
-    public List<Message> getMessages(){
+    public List<Message> getMessages(String queueURL){
         ReceiveMessageRequest receiveRequest = ReceiveMessageRequest.builder()
                 .queueUrl(queueURL)
                 .build();
@@ -57,7 +57,7 @@ public class SQSController {
         return messages;
     }
 
-    public void deleteMessages(List<Message> messages){
+    public void deleteMessages(String queueURL, List<Message> messages){
         for (Message m : messages) {
             DeleteMessageRequest deleteRequest = DeleteMessageRequest.builder()
                     .queueUrl(queueURL)

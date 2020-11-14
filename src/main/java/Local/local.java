@@ -5,8 +5,6 @@ import java.util.Date;
 public class local {
 
     public static void main(String[] args) {
-        final String LOCAL_NAME = "local" + System.currentTimeMillis();
-
         /*
         if (args.length < 3){
             System.out.println("To few arguments, program terminate");
@@ -36,7 +34,7 @@ public class local {
     // 3. Sends a message to an SQS queue, stating the location of the file on S3
 
         // 3.1 create SQS for local2manager & manager2local
-        SQSController sqsLocal = new SQSController(LOCAL_NAME);
+        SQSController sqsLocal = new SQSController();
         String sqsLocalURL = sqsLocal.createQueue("local" + new Date().getTime());
 
         // 3.2 Sends a message to an SQS queue

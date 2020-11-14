@@ -219,4 +219,10 @@ public class S3Controller {
         }
         return false;
     }
+
+    public void getObject(String bucket, String key) {
+        // Get Object
+        s3.getObject(GetObjectRequest.builder().bucket(bucket).key(key).build(),
+                ResponseTransformer.toFile(Paths.get("multiPartKey")));
+    }
 }
