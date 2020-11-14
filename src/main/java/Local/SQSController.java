@@ -28,7 +28,7 @@ public class SQSController {
         try {
             CreateQueueRequest request = CreateQueueRequest.builder()
                     .queueName(sqsName + new Date().getTime())
-                    .build();
+                    .build(); // TODO: Alon 14.11: if name is unique (here), some trouble with manager might occur
             CreateQueueResponse create_result = sqs.createQueue(request);
         } catch (QueueNameExistsException e) {
             throw e;
@@ -69,10 +69,39 @@ public class SQSController {
 
 
     // TODO: Alon 12.11 17:00: added
-    public String getQueueURL(String sqsName) {
+    public String getQueueURLByName(String sqsName) {
         GetQueueUrlRequest getQueueRequest = GetQueueUrlRequest.builder()
                 .queueName(sqsName)
                 .build();
         return sqs.getQueueUrl(getQueueRequest).queueUrl();
     }
+
+    public String getQueueURL() {
+        return queueURL;
+    }
+
+    // TODO: Alon 14.11 17:00: added
+    public String createQueue(String sqsName) {
+        try {
+            sqs = SqsClient.builder()
+                    .region(Region.US_EAST_1)
+                    .build();
+            try {
+                CreateQueueRequest request = CreateQueueRequest.builder()
+                        .queueName(sqsName + new Date().getTime())
+                        .build(); // TODO: Alon 14.11: if name is unique (here), some trouble with manager might occur
+                CreateQueueResponse create_result = sqs.createQueue(request);
+            } catch (QueueNameExistsException e) {
+                throw e;
+            }
+            GetQueueUrlRequest getQueueRequest = GetQueueUrlRequest.builder()
+                    .queueName(sqsName)
+                    .build();
+            this.queueURL = sqs.getQueueUrl(getQueueRequest).queueUrl();
+        } catch (QueueNameExistsException e){
+            this.queueURL = getQueueURLByName(sqsName);
+        }
+        return this.queueURL;
+    }
+
 }
