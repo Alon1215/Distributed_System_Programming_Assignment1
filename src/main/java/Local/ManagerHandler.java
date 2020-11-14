@@ -28,8 +28,7 @@ public class ManagerHandler {
                 .build();
 
         // create new instance (if needed) & set sqs url
-        boolean isExist = checkIfManagerExist();
-        if (!isExist) {
+        if (!checkIfManagerExist()) {
             createInstance();
             System.out.println("Finished making a Manager");
 

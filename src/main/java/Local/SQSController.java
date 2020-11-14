@@ -40,9 +40,9 @@ public class SQSController {
     }
 
 
-    public void sendMessage(String msg){
+    public void sendMessage(String url, String msg){
         SendMessageRequest send_msg_request = SendMessageRequest.builder()
-                .queueUrl(queueURL)
+                .queueUrl(url)
                 .messageBody(msg)
                 .delaySeconds(5)
                 .build();
@@ -68,7 +68,6 @@ public class SQSController {
     }
 
 
-    // TODO: Alon 12.11 17:00: added
     public String getQueueURLByName(String sqsName) {
         GetQueueUrlRequest getQueueRequest = GetQueueUrlRequest.builder()
                 .queueName(sqsName)
@@ -80,7 +79,6 @@ public class SQSController {
         return queueURL;
     }
 
-    // TODO: Alon 14.11 17:00: added
     public String createQueue(String sqsName) {
         try {
             sqs = SqsClient.builder()
