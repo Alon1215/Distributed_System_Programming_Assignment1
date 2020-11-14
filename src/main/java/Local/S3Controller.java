@@ -203,7 +203,9 @@ public class S3Controller {
         s3.putObject(PutObjectRequest.builder().bucket(this.bucketName).key(this.bucketKey)
                         .build(),
                 RequestBody.fromByteBuffer(buffer));
-        return "https://" + this.bucketName + ".s3.amazonaws.com:443/" + this.bucketKey;
+        return "https://" + bucketName + ".s3.Region.amazonaws.com/" + this.bucketKey;
+
+
 
     }
 

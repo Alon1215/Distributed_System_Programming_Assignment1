@@ -3,8 +3,14 @@ package Local;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.ec2.Ec2Client;
 import software.amazon.awssdk.services.ec2.model.*;
+import software.amazon.awssdk.services.sqs.SqsClient;
+import software.amazon.awssdk.services.sqs.model.CreateQueueRequest;
+import software.amazon.awssdk.services.sqs.model.CreateQueueResponse;
+import software.amazon.awssdk.services.sqs.model.GetQueueUrlRequest;
+import software.amazon.awssdk.services.sqs.model.QueueNameExistsException;
 
 import java.util.Base64;
+import java.util.Date;
 import java.util.List;
 
 public class ManagerHandler {
@@ -16,14 +22,18 @@ public class ManagerHandler {
     private String sqsURL;
 
     public ManagerHandler() {
+        // create ec2 clients
         ec2 = Ec2Client.builder()
                 .region(Region.US_EAST_1)
                 .build();
 
+        // create new instance (if needed) & set sqs url
         boolean isExist = checkIfManagerExist();
         if (!isExist) {
             createInstance();
             System.out.println("Finished making a Manager");
+
+            sqsURL = sqs.createQueue("Manager");
 
         }
         else{
@@ -107,6 +117,10 @@ public class ManagerHandler {
         }
         // snippet-end:[ec2.java2.create_instance.main]
         System.out.println("Done!");
+    }
+
+    public String getQueueURL() {
+        return sqsURL;
     }
 }
 
