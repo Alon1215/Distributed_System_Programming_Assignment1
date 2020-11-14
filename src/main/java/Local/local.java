@@ -6,6 +6,7 @@ public class local {
 
     public static void main(String[] args) {
         final String LOCAL_NAME = "local" + System.currentTimeMillis();
+
         /*
         if (args.length < 3){
             System.out.println("To few arguments, program terminate");
