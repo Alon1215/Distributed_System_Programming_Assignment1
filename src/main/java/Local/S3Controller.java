@@ -9,21 +9,7 @@ import java.nio.file.Paths;
 import java.util.Random;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.CompleteMultipartUploadRequest;
-import software.amazon.awssdk.services.s3.model.CompletedMultipartUpload;
-import software.amazon.awssdk.services.s3.model.CompletedPart;
-import software.amazon.awssdk.services.s3.model.CreateBucketConfiguration;
-import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
-import software.amazon.awssdk.services.s3.model.CreateMultipartUploadRequest;
-import software.amazon.awssdk.services.s3.model.CreateMultipartUploadResponse;
-import software.amazon.awssdk.services.s3.model.DeleteBucketRequest;
-import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
-import software.amazon.awssdk.services.s3.model.GetObjectRequest;
-import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
-import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
-import software.amazon.awssdk.services.s3.model.S3Object;
-import software.amazon.awssdk.services.s3.model.UploadPartRequest;
+import software.amazon.awssdk.services.s3.model.*;
 import software.amazon.awssdk.services.s3.paginators.ListObjectsV2Iterable;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.core.sync.ResponseTransformer;
@@ -200,7 +186,6 @@ public class S3Controller {
      * @return url address of the uploaded file in s3 storage
      */
     public String putInputInBucket(String path, String key){
-        String uploadedURL = ""; // needed?
         this.bucketKey = key + System.currentTimeMillis();
 
         // convert path to file / byte buffer
@@ -218,8 +203,8 @@ public class S3Controller {
         s3.putObject(PutObjectRequest.builder().bucket(this.bucketName).key(this.bucketKey)
                         .build(),
                 RequestBody.fromByteBuffer(buffer));
+        return "https://" + this.bucketName + ".s3.amazonaws.com:443/" + this.bucketKey;
 
-        return uploadedURL; // @TODO: Alon 13:00 : should it return file's address?
     }
 
     public boolean deleteCurrBucket() {
