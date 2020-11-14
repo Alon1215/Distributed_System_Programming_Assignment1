@@ -81,27 +81,27 @@ public class SQSController {
     }
 
     // TODO: Alon 14.11 17:00: added
-    public String createQueue(String sqsName) {
-        try {
-            sqs = SqsClient.builder()
-                    .region(Region.US_EAST_1)
-                    .build();
-            try {
-                CreateQueueRequest request = CreateQueueRequest.builder()
-                        .queueName(sqsName + new Date().getTime())
-                        .build(); // TODO: Alon 14.11: if name is unique (here), some trouble with manager might occur
-                CreateQueueResponse create_result = sqs.createQueue(request);
-            } catch (QueueNameExistsException e) {
-                throw e;
-            }
-            GetQueueUrlRequest getQueueRequest = GetQueueUrlRequest.builder()
-                    .queueName(sqsName)
-                    .build();
-            this.queueURL = sqs.getQueueUrl(getQueueRequest).queueUrl();
-        } catch (QueueNameExistsException e){
-            this.queueURL = getQueueURLByName(sqsName);
-        }
-        return this.queueURL;
-    }
+//    public String createQueue(String sqsName) {
+//        try {
+//            sqs = SqsClient.builder()
+//                    .region(Region.US_EAST_1)
+//                    .build();
+//            try {
+//                CreateQueueRequest request = CreateQueueRequest.builder()
+//                        .queueName(sqsName + new Date().getTime())
+//                        .build(); // TODO: Alon 14.11: if name is unique (here), some trouble with manager might occur
+//                CreateQueueResponse create_result = sqs.createQueue(request);
+//            } catch (QueueNameExistsException e) {
+//                throw e;
+//            }
+//            GetQueueUrlRequest getQueueRequest = GetQueueUrlRequest.builder()
+//                    .queueName(sqsName)
+//                    .build();
+//            this.queueURL = sqs.getQueueUrl(getQueueRequest).queueUrl();
+//        } catch (QueueNameExistsException e){
+//            this.queueURL = getQueueURLByName(sqsName);
+//        }
+//        return this.queueURL;
+//    }
 
 }

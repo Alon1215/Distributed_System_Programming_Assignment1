@@ -32,8 +32,8 @@ public class local {
 
     // 3. Sends a message to an SQS queue, stating the location of the file on S3
         // 3.1 create SQS for local2manager & manager2local
-        SQSController sqsLocal = new SQSController(LOCAL_NAME);
-        String sqsLocalURL = sqsLocal.getQueueURL();
+//        SQSController sqsLocal = new SQSController(LOCAL_NAME);
+//        String sqsLocalURL = sqsLocal.getQueueURL();
         //String sqsManagerURL = sqsLocal.getQueueURLByName("Manager");
 
         // 3.2 Sends a message to an SQS queue
