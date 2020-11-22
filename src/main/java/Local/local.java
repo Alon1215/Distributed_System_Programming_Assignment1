@@ -1,5 +1,6 @@
 package Local;
 
+import java.util.Arrays;
 import java.util.Date;
 
 public class local {
@@ -23,23 +24,23 @@ public class local {
         ManagerHandler manager = new ManagerHandler(); // create new manager if doesn't exist, else represents current one
         // check which parameters are needed
 
-
-
-    // 2. Upload input file to S3
-        S3Controller s3 = new S3Controller();
-        s3.createNewBucket();
-        String fileS3Address = s3.putInputInBucket(inputFile, "inputFile");
-        System.out.println(fileS3Address);
-
-    // 3. Sends a message to an SQS queue, stating the location of the file on S3
-
-        // 3.1 create SQS for local2manager & manager2local
-        SQSController sqsLocal = new SQSController();
-        String sqsLocalURL = sqsLocal.createQueue("local" + new Date().getTime());
-
-        // 3.2 Sends a message to an SQS queue
-        sqsLocal.sendMessage(manager.getQueueURL(), new TaskProtocol("new task",fileS3Address, sqsLocalURL).toString());
-
+//
+//
+//    // 2. Upload input file to S3
+//        S3Controller s3 = new S3Controller();
+//        s3.createNewBucket();
+//        String[] bucket_key = s3.putInputInBucket(inputFile, "inputFile");
+//        System.out.println(Arrays.toString(bucket_key)); // TODO: delete, test only
+//
+//    // 3. Sends a message to an SQS queue, stating the location of the file on S3
+//
+//        // 3.1 create SQS for local2manager & manager2local
+//        SQSController sqsLocal = new SQSController();
+//        String sqsLocalURL = sqsLocal.createQueue("local" + new Date().getTime());
+//
+//        // 3.2 Sends a message to an SQS queue
+//        sqsLocal.sendMessage(manager.getQueueURL(), new TaskProtocol("new task",bucket_key[0], bucket_key[1], sqsLocalURL).toString());
+//
 
     // 4. Checks an SQS queue for a message indicating the process is done and the response (the summary file) is available on S3.
 

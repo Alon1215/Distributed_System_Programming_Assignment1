@@ -3,10 +3,13 @@ package Local;
 // snippet-start:[s3.java2.s3_object_operations.import]
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Random;
+import java.util.Scanner;
+
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
@@ -185,7 +188,7 @@ public class S3Controller {
      * @param path indicates file current path
      * @return url address of the uploaded file in s3 storage
      */
-    public String putInputInBucket(String path, String key){
+    public String[] putInputInBucket(String path, String key){
         this.bucketKey = key + System.currentTimeMillis();
 
         // convert path to file / byte buffer
@@ -195,7 +198,7 @@ public class S3Controller {
         } catch (IOException e) {
             //e.printStackTrace();
             System.out.println("Input file not found");
-            return "ERROR";
+            return new String[]{"ERROR"};
         }
         ByteBuffer buffer = ByteBuffer.wrap(bytes);
 
@@ -203,7 +206,7 @@ public class S3Controller {
         s3.putObject(PutObjectRequest.builder().bucket(this.bucketName).key(this.bucketKey)
                         .build(),
                 RequestBody.fromByteBuffer(buffer));
-        return "https://" + this.bucketName + ".s3." + this.region.toString() + ".amazonaws.com/" + this.bucketKey;
+        return new String[]{this.bucketName, this.bucketKey};
 
 
     }
@@ -220,9 +223,24 @@ public class S3Controller {
         return false;
     }
 
-    public void getObject(String bucket, String key) {
+    public String[] getObject(String bucket, String key) {
         // Get Object
-        s3.getObject(GetObjectRequest.builder().bucket(bucket).key(key).build(),
-                ResponseTransformer.toFile(Paths.get("multiPartKey")));
+
+        InputStream inputStream = s3.getObject(GetObjectRequest.builder().bucket(bucket).key(key).build(),
+                ResponseTransformer.toInputStream());
+        return input2StringArr(inputStream);
+    }
+
+    private String[] input2StringArr(InputStream inputStream) {
+        //Creating a Scanner object
+        Scanner sc = new Scanner(inputStream);
+        //Reading line by line from scanner to StringBuffer
+        StringBuilder sb = new StringBuilder();
+        while(sc.hasNext()){
+            sb.append(sc.nextLine());
+        }
+        System.out.println(sb.toString());
+
+        return sb.toString().split("\n");
     }
 }

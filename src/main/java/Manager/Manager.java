@@ -22,21 +22,24 @@ public class Manager {
                     msg_s = msg.toString().split("\n");
                     String type = msg_s[0];
 
-                    if(type.equals("new task")){
-                        // retrieve input file from S3
+                    switch (type) {
+                        case "new task":
+                            // retrieve input file from S3
 //                        String fileAddress = msg_s[1];
-                        String[] bucket_key = msg_s[1].split(" ");
-                        s3.getObject(bucket_key[0],bucket_key[1]);
+//                            String[] bucket_key = msg_s[1].split(" ");
+                            String[] msgArr = s3.getObject(msg_s[1], msg_s[2]);
+                            // TODO: send to workers
+                            break;
+                        case "done OCR task":
 
-                    }
-                    else if (type.equals("done OCR task")){
 
-                    }
-                    else if (type.equals("termination")){
+                            break;
+                        case "termination":
 
-                    }
-                    else {
-                        // not suppose to happen
+                            break;
+                        default:
+                            // not suppose to happen
+                            break;
                     }
                 }
                 // 2.1 If the message is that of a new task it:
@@ -55,5 +58,9 @@ public class Manager {
             }
 
         }
+    }
+
+    private static void handleNewTask(String[] msg_s) {
+
     }
 }

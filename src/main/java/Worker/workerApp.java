@@ -1,4 +1,5 @@
 package Worker;
+import Local.*;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -12,13 +13,22 @@ import net.sourceforge.tess4j.Tesseract;
 import net.sourceforge.tess4j.TesseractException;
 
 import java.net.URL;
+import java.sql.Time;
 import java.util.Scanner; // Import the Scanner class to read text files
 
 
 public class workerApp {
 
     public static void main(String[] args) {
-        System.out.println("Start->");
+        final String uniqueName = "Worker" + System.currentTimeMillis();
+        System.out.println(uniqueName + ": Start->");
+        if (args.length <2){ // TODO: args check, decide how many args required
+            System.out.println(uniqueName + ": Not enough arguments, Worker shut down ungracefully");
+            System.exit(1);
+        }
+        //String url = args[0];
+
+//        System.out.println("Start->");
 //        if (args.length > 2){
 //            convertDemo(args[1]);
 //        }
