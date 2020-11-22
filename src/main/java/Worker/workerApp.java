@@ -11,9 +11,12 @@ import java.net.MalformedURLException;
 
 import net.sourceforge.tess4j.Tesseract;
 import net.sourceforge.tess4j.TesseractException;
+import software.amazon.awssdk.services.sqs.model.Message;
 
 import java.net.URL;
+import java.sql.SQLException;
 import java.sql.Time;
+import java.util.List;
 import java.util.Scanner; // Import the Scanner class to read text files
 
 
@@ -21,20 +24,55 @@ public class workerApp {
 
     public static void main(String[] args) {
         final String uniqueName = "Worker" + System.currentTimeMillis();
-        System.out.println(uniqueName + ": Start->");
-        if (args.length <2){ // TODO: args check, decide how many args required
+        System.out.println(uniqueName + ": Start->");  // TODO: delete, test only
+
+        if (args.length == 0){ // TODO: args check, decide how many args required
             System.out.println(uniqueName + ": Not enough arguments, Worker shut down ungracefully");
             System.exit(1);
         }
 
-
-        //String url = args[0];
-
+        String replyManagerUrl = args[0]; //worker2manager queue
+        String workersQueueUrl = args[1]; //worker2manager queue
+        workerLoop(replyManagerUrl, workersQueueUrl);
 //        System.out.println("Start->");
 //        if (args.length > 2){
 //            convertDemo(args[1]);
 //        }
         convertDemo("Demo");
+
+    }
+
+    private static void workerLoop(String managerUrl, String workersQueueUrl) {
+        SQSController sqs = new SQSController();
+        boolean isTerminated = false;
+
+        while (!isTerminated) {
+            List<Message> messages = sqs.getMessages(workersQueueUrl);
+            for (Message msg : messages) {
+                String[] msg_s;
+                if (msg != null) {
+                    msg_s = msg.toString().split("\n");
+                    String type = msg_s[0];
+
+                    switch (type) {
+                        case "new ocr task":
+                            String textOutput = img2Txt(msg_s[1]);
+                            sqs.sendMessage(managerUrl, new TaskProtocol("done ocr task",msg_s[1], textOutput,msg_s[3]).toString());
+                            break;
+
+                        case "termination":
+                            isTerminated = true;
+                            break;
+                        default:
+                            // not suppose to happen
+                            System.out.println("Bad task protocol");
+                            break;
+                    }
+                }
+            }
+        }
+        // TODO: how to terminate worker (done outside of loop)
+
 
     }
 
@@ -59,6 +97,8 @@ public class workerApp {
             e.printStackTrace();
         }
     }
+
+
     public static BufferedImage toBufferedImage(Image img) {
         if (img instanceof BufferedImage) {
             return (BufferedImage) img;
@@ -96,5 +136,24 @@ public class workerApp {
         System.out.println("Result: " + s);
 
 
+    }
+
+    public static String img2Txt(String url) {
+
+        Tesseract tesseract = new Tesseract();
+        tesseract.setDatapath("tessdata-master");
+
+        try {
+            URL url_IMG = new URL(url);
+            Image image = ImageIO.read(url_IMG);
+            String s = null;
+            if(image == null)
+                return "";
+            s = tesseract.doOCR(toBufferedImage(image));
+            System.out.println("Result: " + s);
+            return s;
+        } catch (IOException | TesseractException e) {
+            return (e instanceof TesseractException) ? "input file: error Image not found" : "input file: error OCR";
+        }
     }
 }

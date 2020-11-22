@@ -40,6 +40,7 @@ public class SQSController {
     }
 
 
+
     public void sendMessage(String url, String msg){
         SendMessageRequest send_msg_request = SendMessageRequest.builder()
                 .queueUrl(url)

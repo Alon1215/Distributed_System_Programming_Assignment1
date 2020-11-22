@@ -32,7 +32,7 @@ public class ManagerHandler {
             createInstance();
             System.out.println("Finished making a Manager");
 
-            sqsURL = sqs.createQueue("Manager");
+//            sqsURL = sqs.createQueue("Manager");
 
         }
         else{
@@ -66,6 +66,10 @@ public class ManagerHandler {
         return false;
     }
 
+    /**
+     * Create EC2 for manager node & create new sqs queue for local to manager communication
+     * (manager listen to queue)
+     */
     public void createInstance(){
 
         final String USAGE =
