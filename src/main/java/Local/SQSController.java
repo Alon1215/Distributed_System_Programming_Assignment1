@@ -85,6 +85,7 @@ public class SQSController {
             sqs = SqsClient.builder()
                     .region(Region.US_EAST_1)
                     .build();
+
             try {
                 CreateQueueRequest request = CreateQueueRequest.builder()
                         .queueName(sqsName)
