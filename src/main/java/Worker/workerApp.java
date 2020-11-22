@@ -16,8 +16,8 @@ import software.amazon.awssdk.services.sqs.model.Message;
 import java.net.URL;
 import java.sql.SQLException;
 import java.sql.Time;
+import java.util.*;
 import java.util.List;
-import java.util.Scanner; // Import the Scanner class to read text files
 
 
 public class workerApp {
@@ -26,7 +26,7 @@ public class workerApp {
         final String uniqueName = "Worker" + System.currentTimeMillis();
         System.out.println(uniqueName + ": Start->");  // TODO: delete, test only
 
-        if (args.length == 0){ // TODO: args check, decide how many args required
+        if (args.length < 2){ // TODO: args check, decide how many args required
             System.out.println(uniqueName + ": Not enough arguments, Worker shut down ungracefully");
             System.exit(1);
         }
@@ -34,11 +34,10 @@ public class workerApp {
         String replyManagerUrl = args[0]; //worker2manager queue
         String workersQueueUrl = args[1]; //worker2manager queue
         workerLoop(replyManagerUrl, workersQueueUrl);
-//        System.out.println("Start->");
-//        if (args.length > 2){
-//            convertDemo(args[1]);
-//        }
-        convertDemo("Demo");
+        //terminateWorker(replyManagerUrl);    // TODO: how to terminate worker (done outside of loop)
+
+
+//        convertDemo("Demo"); // TODO: delete. test only
 
     }
 
@@ -58,6 +57,7 @@ public class workerApp {
                         case "new ocr task":
                             String textOutput = img2Txt(msg_s[1]);
                             sqs.sendMessage(managerUrl, new TaskProtocol("done ocr task",msg_s[1], textOutput,msg_s[3]).toString());
+                            sqs.deleteMessages(workersQueueUrl,new ArrayList<>(Collections.singleton(msg)));
                             break;
 
                         case "termination":
@@ -71,9 +71,6 @@ public class workerApp {
                 }
             }
         }
-        // TODO: how to terminate worker (done outside of loop)
-
-
     }
 
     public static void convertDemo(String path) {
