@@ -26,6 +26,8 @@ public class workerApp {
             System.out.println(uniqueName + ": Not enough arguments, Worker shut down ungracefully");
             System.exit(1);
         }
+
+
         //String url = args[0];
 
 //        System.out.println("Start->");
