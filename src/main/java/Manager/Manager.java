@@ -14,10 +14,10 @@ public class Manager {
 //      int n = args[0]; // TODO:
         int n = 10; // temp
     // 1. Retrieve sqs url (and create sqs client
+        WorkersHandler workersHandler = new WorkersHandler(n);
         S3Controller s3 = new S3Controller();
         SQSController sqsManager = new SQSController();
         String sqsManagerURL = sqsManager.getQueueURLByName("Manager");
-        String M2W_queURL = sqsManager.createQueue("ManagerToWorkers" + new Date().getTime());
         ConcurrentHashMap<String, Integer> amountOfMessagesPerLocal = new ConcurrentHashMap<String, Integer>();
         ConcurrentHashMap<String, Vector<Pair<String, String>>> identifiedMessages = new ConcurrentHashMap<String, Vector<Pair<String, String>>>();
         // 2. Manager listen to his sqs queue
@@ -38,11 +38,9 @@ public class Manager {
                             identifiedMessages.put(replyUrl, new Vector<Pair<String, String>>());
                             String[] msgArr = s3.getObject(msg_s[1], msg_s[2]);
                             // TODO: send to workers
-                            for(String url: msgArr){
-                                amountOfMessagesPerLocal.replace(replyUrl, amountOfMessagesPerLocal.get(replyUrl) + 1);
-                                TaskProtocol task = new TaskProtocol("new image task", url, "", replyUrl);
-                                sqsManager.sendMessage(M2W_queURL, task.toString());
-                            }
+                            amountOfMessagesPerLocal.replace(replyUrl, amountOfMessagesPerLocal.get(replyUrl) + msgArr.length);
+
+
                             break;
                         case "done OCR task":
                             Pair<String, String> img_identified_text = new Pair<String, String>(msg_s[1], msg_s[2]);
