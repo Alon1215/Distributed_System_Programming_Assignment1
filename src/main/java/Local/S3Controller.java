@@ -19,103 +19,23 @@ import software.amazon.awssdk.core.sync.ResponseTransformer;
 
 public class S3Controller {
 
-    private static S3Client s3 = S3Client.builder().region(Region.US_EAST_1).build();
+    private static final S3Client s3 = S3Client.builder().region(Region.US_EAST_1).build();
     private String bucketName; // @TODO: Alon 12:00 : added field
     private String bucketKey; // @TODO: Alon 12:00 : added field
     private final Region region = Region.US_EAST_1;  // @TODO: Alon 12:00 : added field
 
-    public static void main(String[] args) throws IOException {
-        Region region = Region.US_EAST_1;
-        s3 = S3Client.builder().region(region).build();
-
-
-        String bucket = "bucket" + System.currentTimeMillis();
-        String key = "key";
-
-        createBucket(bucket, region);
-
-        // Put Object
-        s3.putObject(PutObjectRequest.builder().bucket(bucket).key(key)
-                        .build(),
-                RequestBody.fromByteBuffer(getRandomByteBuffer(10_000)));
-
-
-        // Multipart Upload a file
-        String multipartKey = "multiPartKey";
-        multipartUpload(bucket, multipartKey);
-
-        // List all objects in bucket
-
-        // Use manual pagination
-        ListObjectsV2Request listObjectsReqManual = ListObjectsV2Request.builder()
-                .bucket(bucket)
-                .maxKeys(1)
-                .build();
-
-        boolean done = false;
-        while (!done) {
-            ListObjectsV2Response listObjResponse = s3.listObjectsV2(listObjectsReqManual);
-            for (S3Object content : listObjResponse.contents()) {
-                System.out.println(content.key());
-            }
-
-            if (listObjResponse.nextContinuationToken() == null) {
-                done = true;
-            }
-
-            listObjectsReqManual = listObjectsReqManual.toBuilder()
-                    .continuationToken(listObjResponse.nextContinuationToken())
-                    .build();
-        }
-        // Build the list objects request
-        ListObjectsV2Request listReq = ListObjectsV2Request.builder()
-                .bucket(bucket)
-                .maxKeys(1)
-                .build();
-
-        ListObjectsV2Iterable listRes = s3.listObjectsV2Paginator(listReq);
-        // Process response pages
-        listRes.stream()
-                .flatMap(r -> r.contents().stream())
-                .forEach(content -> System.out.println(" Key: " + content.key() + " size = " + content.size()));
-
-        // Helper method to work with paginated collection of items directly
-        listRes.contents().stream()
-                .forEach(content -> System.out.println(" Key: " + content.key() + " size = " + content.size()));
-        // Use simple for loop if stream is not necessary
-        for (S3Object content : listRes.contents()) {
-            System.out.println(" Key: " + content.key() + " size = " + content.size());
-        }
-
-        // Get Object
-        s3.getObject(GetObjectRequest.builder().bucket(bucket).key(key).build(),
-                ResponseTransformer.toFile(Paths.get("multiPartKey")));
-        // snippet-end:[s3.java2.s3_object_operations.download]
-
-        // Delete Object
-        DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder().bucket(bucket).key(key).build();
-        s3.deleteObject(deleteObjectRequest);
-
-        // Delete Object
-        deleteObjectRequest = DeleteObjectRequest.builder().bucket(bucket).key(multipartKey).build();
-        s3.deleteObject(deleteObjectRequest);
-
-        deleteBucket(bucket);
-    }
-
-
-    private static void createBucket(String bucket, Region region) {
-        s3.createBucket(CreateBucketRequest
-                .builder()
-                .bucket(bucket)
-                .createBucketConfiguration(
-                        CreateBucketConfiguration.builder()
-                                .locationConstraint(region.id())
-                                .build())
-                .build());
-
-        System.out.println(bucket);
-    }
+//    private static void createBucket(String bucket, Region region) {
+//        s3.createBucket(CreateBucketRequest
+//                .builder()
+//                .bucket(bucket)
+//                .createBucketConfiguration(
+//                        CreateBucketConfiguration.builder()
+//                                .locationConstraint(region.id())
+//                                .build())
+//                .build());
+//
+//        System.out.println(bucket);
+//    }
 
     private static void deleteBucket(String bucket) {
         DeleteBucketRequest deleteBucketRequest = DeleteBucketRequest.builder().bucket(bucket).build();
