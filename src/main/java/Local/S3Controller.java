@@ -239,7 +239,7 @@ public class S3Controller {
         while(sc.hasNext()){
             sb.append(sc.nextLine());
         }
-        System.out.println(sb.toString());
+     //   System.out.println(sb.toString());
 
         return sb.toString().split("\n");
     }
