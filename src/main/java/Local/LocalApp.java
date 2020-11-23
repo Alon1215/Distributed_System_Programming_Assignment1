@@ -3,7 +3,7 @@ package Local;
 import java.util.Arrays;
 import java.util.Date;
 
-public class local {
+public class LocalApp {
 
     public static void main(String[] args) {
         /*

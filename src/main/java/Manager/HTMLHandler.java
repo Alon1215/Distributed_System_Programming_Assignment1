@@ -32,7 +32,6 @@ public class HTMLHandler {
             return f;
         }catch (IOException e){
             System.out.println("problem with io");
-            //e.printStackTrace();
             return null;
         }
     }

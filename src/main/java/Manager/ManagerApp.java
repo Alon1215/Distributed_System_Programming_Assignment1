@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class Manager {
+public class ManagerApp {
     public static void main(String[] args) {
 //      int n = args[0]; // TODO:
         int n = 10; // temp

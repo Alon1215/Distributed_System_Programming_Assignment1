@@ -20,7 +20,7 @@ import java.util.*;
 import java.util.List;
 
 
-public class workerApp {
+public class WorkerApp {
 
     public static void main(String[] args) {
         final String uniqueName = "Worker" + System.currentTimeMillis();
