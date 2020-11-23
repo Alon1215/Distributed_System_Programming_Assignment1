@@ -18,8 +18,6 @@ public class Manager {
         S3Controller s3 = new S3Controller();
         SQSController sqsManager = new SQSController();
         String sqsManagerURL = sqsManager.getQueueURLByName("Manager");
-        ConcurrentHashMap<String, Integer> amountOfMessagesPerLocal = new ConcurrentHashMap<String, Integer>();
-        ConcurrentHashMap<String, Vector<Pair<String, String>>> identifiedMessages = new ConcurrentHashMap<String, Vector<Pair<String, String>>>();
         // 2. Manager listen to his sqs queue
         while (true) {
             List<Message> messages = sqsManager.getMessages(sqsManagerURL);
@@ -31,25 +29,11 @@ public class Manager {
                     String replyUrl = msg_s[3];
                     switch (type) {
                         case "new task":
-                            // retrieve input file from S3
-//                        String fileAddress = msg_s[1];
-//                            String[] bucket_key = msg_s[1].split(" ");
-                            amountOfMessagesPerLocal.put(replyUrl, 0);
-                            identifiedMessages.put(replyUrl, new Vector<Pair<String, String>>());
                             String[] msgArr = s3.getObject(msg_s[1], msg_s[2]);
-                            // TODO: send to workers
-                            amountOfMessagesPerLocal.replace(replyUrl, amountOfMessagesPerLocal.get(replyUrl) + msgArr.length);
                             workersHandler.handleNewTask(msgArr, replyUrl);
-
                             break;
                         case "done OCR task":
-                            Pair<String, String> img_identified_text = new Pair<String, String>(msg_s[1], msg_s[2]);
-                            identifiedMessages.get(replyUrl).add(img_identified_text);
-                            amountOfMessagesPerLocal.replace(replyUrl, amountOfMessagesPerLocal.get(replyUrl) - 1);
-                            if(amountOfMessagesPerLocal.get(replyUrl) <= 0){
-                                // TODO: make a html file and upload it to s3
-                                //TaskProtocol done_task = new TaskProtocol()
-                            }
+
                             //TaskProtocol task = new TaskProtocol("done task", )
                             break;
                         case "termination":

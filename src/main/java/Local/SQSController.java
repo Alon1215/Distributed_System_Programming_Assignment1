@@ -54,8 +54,7 @@ public class SQSController {
         ReceiveMessageRequest receiveRequest = ReceiveMessageRequest.builder()
                 .queueUrl(queueURL)
                 .build();
-        List<Message> messages = sqs.receiveMessage(receiveRequest).messages();
-        return messages;
+        return sqs.receiveMessage(receiveRequest).messages();
     }
 
     public void deleteMessages(String queueURL, List<Message> messages){

@@ -2,6 +2,7 @@ package Manager;
 
 import Local.SQSController;
 import Local.TaskProtocol;
+import javafx.util.Pair;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.ec2.Ec2Client;
 import software.amazon.awssdk.services.ec2.model.*;
@@ -9,17 +10,20 @@ import software.amazon.awssdk.services.ec2.model.*;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
+import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class WorkersHandler {
+    ConcurrentHashMap<String, Integer> amountOfMessagesPerLocal = new ConcurrentHashMap<String, Integer>();
+    ConcurrentHashMap<String, Vector<Pair<String, String>>> identifiedMessages = new ConcurrentHashMap<String, Vector<Pair<String, String>>>();
+
     String amiId = "AMI here";
     int amountOfActiveWorkers = 0;
     String M2W_queURL;
     String W2M_queURL;
     private final Ec2Client ec2;
     ArrayList<String> workersInstances;
-    SQSController controller;
+    SQSController sqsController;
     private int imagesPerWorker;
 
     public WorkersHandler(int n){
@@ -27,9 +31,9 @@ public class WorkersHandler {
         ec2 = Ec2Client.builder()
                 .region(Region.US_EAST_1)
                 .build();
-        controller = new SQSController();
-        M2W_queURL = controller.createQueue("ManagerToWorkers" + new Date().getTime());
-        W2M_queURL = controller.createQueue("WorkersToManager" + new Date().getTime());
+        sqsController = new SQSController();
+        M2W_queURL = sqsController.createQueue("ManagerToWorkers" + new Date().getTime());
+        W2M_queURL = sqsController.createQueue("WorkersToManager" + new Date().getTime());
 
         workersInstances = new ArrayList<String>();
     }
@@ -42,11 +46,17 @@ public class WorkersHandler {
                 createWorker();
             }
         }
+        amountOfMessagesPerLocal.put(replyUrl, 0);
+        identifiedMessages.put(replyUrl, new Vector<Pair<String, String>>());
+        amountOfMessagesPerLocal.replace(replyUrl, amountOfMessagesPerLocal.get(replyUrl) + urls.length);
 
-        for(String url: urls){
-            TaskProtocol task = new TaskProtocol("new image task", url, "", replyUrl);
-            controller.sendMessage(M2W_queURL, task.toString());
+        for(String imageUrl: urls){
+            TaskProtocol task = new TaskProtocol("new image task", imageUrl, "", replyUrl);
+            sqsController.sendMessage(M2W_queURL, task.toString());
+
         }
+
+        //new Thread(WaitForOutput());
     }
     public void createWorker() {
         final String USAGE =
@@ -69,7 +79,7 @@ public class WorkersHandler {
 
         String instanceId = response.instances().get(0).instanceId();
         workersInstances.add(instanceId);
-
+        amountOfActiveWorkers++;
         Tag tag = Tag.builder()
                 .key("Name")
                 .value("Worker" + System.currentTimeMillis())
