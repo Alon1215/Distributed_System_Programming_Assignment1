@@ -1,20 +1,26 @@
 package Manager;
 
+import Local.S3Controller;
 import Local.SQSController;
+import Local.TaskProtocol;
+import com.sun.istack.internal.NotNull;
 import javafx.util.Pair;
 import software.amazon.awssdk.services.sqs.model.Message;
 
+import java.io.File;
 import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class WorkersListener implements Runnable {
     SQSController sqsController;
+    S3Controller s3Controller = new S3Controller();
     String sqsUrl;
     ConcurrentHashMap<String, Integer> amountOfMessagesPerLocal;
     ConcurrentHashMap<String, Vector<Pair<String, String>>> identifiedMessages;
-
-    public WorkersListener(String sqsUrl, ConcurrentHashMap<String, Integer> amountOfMessagesPerLocal, ConcurrentHashMap<String, Vector<Pair<String, String>>> identifiedMessages) {
+    String bucket;
+    public WorkersListener(String sqsUrl, ConcurrentHashMap<String, Integer> amountOfMessagesPerLocal, ConcurrentHashMap<String, Vector<Pair<String, String>>> identifiedMessages, String bucket) {
+        this.bucket = bucket;
         this.sqsController = new SQSController();
         this.sqsUrl = sqsUrl;
         this.amountOfMessagesPerLocal = amountOfMessagesPerLocal;
@@ -40,14 +46,15 @@ public class WorkersListener implements Runnable {
                             if (amountOfMessagesPerLocal.get(replyUrl) <= 0) {
                                 // TODO: make a html file and upload it to s3
                                 
-                                doneTask();
+                                doneTask(replyUrl, bucket);
                                 amountOfMessagesPerLocal.remove(replyUrl);
                                 //TaskProtocol done_task = new TaskProtocol()
                             }
                             //TaskProtocol task = new TaskProtocol("done task", )
                             break;
                         case "termination":
-                            //DELETE LATER
+                            //TODO: DELETE LATER
+                            System.out.println("Terminating thread W2M Listener");
                             System.exit(1);
                             break;
                         default:
@@ -59,6 +66,10 @@ public class WorkersListener implements Runnable {
         }
     }
 
-    private void doneTask() {
+    private void doneTask(String replyUrl, String bucket) {
+        Vector<Pair<String, String>> imageData = identifiedMessages.get(replyUrl);
+        File f = HTMLHandler.parseListOfUrlAndTextToHTML(imageData, replyUrl);
+        String[] bucket_key = s3Controller.putInputInBucket(f != null ? f.getAbsolutePath() : null, bucket, "summary" + System.currentTimeMillis());
+        sqsController.sendMessage(replyUrl, new TaskProtocol("done task", bucket_key[0], bucket_key[1], "").toString());
     }
 }

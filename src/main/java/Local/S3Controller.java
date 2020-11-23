@@ -2,6 +2,7 @@ package Local;
 // snippet-start:[s3.java2.s3_object_operations.complete]
 // snippet-start:[s3.java2.s3_object_operations.import]
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -13,7 +14,6 @@ import java.util.Scanner;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
-import software.amazon.awssdk.services.s3.paginators.ListObjectsV2Iterable;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.core.sync.ResponseTransformer;
 
@@ -21,7 +21,7 @@ public class S3Controller {
 
     private static final S3Client s3 = S3Client.builder().region(Region.US_EAST_1).build();
     private String bucketName; // @TODO: Alon 12:00 : added field
-    private String bucketKey; // @TODO: Alon 12:00 : added field
+    private String keyName; // @TODO: Alon 12:00 : added field
     private final Region region = Region.US_EAST_1;  // @TODO: Alon 12:00 : added field
 
 //    private static void createBucket(String bucket, Region region) {
@@ -110,8 +110,8 @@ public class S3Controller {
      * @param path indicates file current path
      * @return url address of the uploaded file in s3 storage
      */
-    public String[] putInputInBucket(String path, String key){
-        this.bucketKey = key + System.currentTimeMillis();
+    public String[] putInputInBucket(String path,String bucketName, String name){
+        this.keyName = name + System.currentTimeMillis();
 
         // convert path to file / byte buffer
         byte[] bytes;
@@ -125,10 +125,10 @@ public class S3Controller {
         ByteBuffer buffer = ByteBuffer.wrap(bytes);
 
         // Put Object
-        s3.putObject(PutObjectRequest.builder().bucket(this.bucketName).key(this.bucketKey)
+        s3.putObject(PutObjectRequest.builder().bucket(this.bucketName).key(this.keyName)
                         .build(),
                 RequestBody.fromByteBuffer(buffer));
-        return new String[]{this.bucketName, this.bucketKey};
+        return new String[]{this.bucketName, this.keyName};
 
 
     }
@@ -139,12 +139,17 @@ public class S3Controller {
             s3.deleteBucket(deleteBucketRequest);
 
             this.bucketName = "";
-            this.bucketKey = "";
+            this.keyName = "";
             return true;
         }
         return false;
     }
 
+    public void downloadSummaryFile(String bucket, String key, String outputName){
+        File summary = new File(outputName + ".html");
+        s3.getObject(GetObjectRequest.builder().bucket(bucket).key(key).build(),
+                ResponseTransformer.toFile(summary));
+    }
     public String[] getUrls(String bucket, String key) {
         // Get Object
 

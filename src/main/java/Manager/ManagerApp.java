@@ -29,8 +29,8 @@ public class ManagerApp {
                     String replyUrl = msg_s[3];
                     switch (type) {
                         case "new task":
-                            String[] msgArr = s3.getUrls(msg_s[1], msg_s[2]);
-                            workersHandler.handleNewTask(msgArr, replyUrl);
+                            //String[] msgArr = s3.getUrls(msg_s[1], msg_s[2]);
+                            workersHandler.handleNewTask(msg_s, replyUrl);
                             break;
                         case "done OCR task":
 

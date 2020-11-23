@@ -1,5 +1,6 @@
 package Manager;
 
+import Local.S3Controller;
 import Local.SQSController;
 import Local.TaskProtocol;
 import javafx.util.Pair;
@@ -22,8 +23,10 @@ public class WorkersHandler {
     String M2W_queURL;
     String W2M_queURL;
     private final Ec2Client ec2;
+
     ArrayList<String> workersInstances;
-    SQSController sqsController;
+    S3Controller s3 = new S3Controller();
+    SQSController sqsController = new SQSController();
     private int imagesPerWorker;
 
     public WorkersHandler(int n){
@@ -31,14 +34,16 @@ public class WorkersHandler {
         ec2 = Ec2Client.builder()
                 .region(Region.US_EAST_1)
                 .build();
-        sqsController = new SQSController();
         M2W_queURL = sqsController.createQueue("ManagerToWorkers" + new Date().getTime());
         W2M_queURL = sqsController.createQueue("WorkersToManager" + new Date().getTime());
 
         workersInstances = new ArrayList<String>();
     }
 
-    public void handleNewTask(String[] urls, String replyUrl){
+    public void handleNewTask(String[] msg_s, String replyUrl){
+        String[] urls = s3.getUrls(msg_s[1], msg_s[2]);
+        String bucket = msg_s[1];
+        String key = msg_s[2];
         //TODO: Create new workers if needed
         double requiredWorkers = (double) urls.length/imagesPerWorker;
         if(requiredWorkers > amountOfActiveWorkers){
@@ -55,7 +60,7 @@ public class WorkersHandler {
             sqsController.sendMessage(M2W_queURL, task.toString());
 
         }
-
+        WorkersListener listener = new WorkersListener(W2M_queURL, amountOfMessagesPerLocal, identifiedMessages, bucket);
         //new Thread(WaitForOutput());
     }
     public void createWorker() {
