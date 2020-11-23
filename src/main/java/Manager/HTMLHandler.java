@@ -13,7 +13,7 @@ import java.util.Vector;
 
 public class HTMLHandler {
 
-    public static void parseListOfUrlAndTextToHTML(Vector<Pair<String,String>> urlsToText, String replyUrl){
+    public static File parseListOfUrlAndTextToHTML(Vector<Pair<String,String>> urlsToText, String replyUrl){
 
         File f = new File(replyUrl+".html");
         try{
@@ -29,9 +29,11 @@ public class HTMLHandler {
             }
             bw.write("\t</body>\n</html>");
             bw.close();
+            return f;
         }catch (IOException e){
             System.out.println("problem with io");
-            e.printStackTrace();
+            //e.printStackTrace();
+            return null;
         }
     }
 
