@@ -1,7 +1,7 @@
 package Local;
 
 
-public class TaskProtocol {
+public class    TaskProtocol {
     private final String type; // new task / termination
     private final String field1;
     private final String field2;

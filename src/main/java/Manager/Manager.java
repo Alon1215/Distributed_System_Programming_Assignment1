@@ -39,7 +39,7 @@ public class Manager {
                             String[] msgArr = s3.getObject(msg_s[1], msg_s[2]);
                             // TODO: send to workers
                             amountOfMessagesPerLocal.replace(replyUrl, amountOfMessagesPerLocal.get(replyUrl) + msgArr.length);
-
+                            workersHandler.handleNewTask(msgArr, replyUrl);
 
                             break;
                         case "done OCR task":
@@ -47,7 +47,7 @@ public class Manager {
                             identifiedMessages.get(replyUrl).add(img_identified_text);
                             amountOfMessagesPerLocal.replace(replyUrl, amountOfMessagesPerLocal.get(replyUrl) - 1);
                             if(amountOfMessagesPerLocal.get(replyUrl) <= 0){
-                                // TODO: upload the file to s3
+                                // TODO: make a html file and upload it to s3
                                 //TaskProtocol done_task = new TaskProtocol()
                             }
                             //TaskProtocol task = new TaskProtocol("done task", )
@@ -79,7 +79,4 @@ public class Manager {
         }
     }
 
-    private static void handleNewTask(String[] msg_s) {
-
-    }
 }
