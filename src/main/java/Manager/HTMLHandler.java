@@ -1,6 +1,14 @@
 package Manager;
 
+import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
+import javafx.util.Pair;
+
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Map;
+import java.util.Vector;
 
 public class HTMLHandler {
 
@@ -14,16 +22,16 @@ public class HTMLHandler {
     public HTMLHandler() {
     }
 
-    public void parseListOfUrlAndTextToHTML(Map<String,String> urlsToText, String fileName){
+    public void parseListOfUrlAndTextToHTML(Vector<Pair<String,String>> urlsToText, String fileName){
         File f = new File(fileName+".html");
         try{
             BufferedWriter bw = new BufferedWriter(new FileWriter(f));
             bw.write(HTML_HEADER);
-            for(Map.Entry<String,String> imageWithParse : urlsToText.entrySet()){
+            for(Pair<String, String> p : urlsToText){
 
-                String paragraph = HTML_START_PARAGRAPH_AND_IMAGE + imageWithParse.getKey() +
+                String paragraph = HTML_START_PARAGRAPH_AND_IMAGE + p.getKey() +
                         HTML_AFTER_IMAGE_BEFORE_TEXT +
-                        imageWithParse.getValue() +
+                        p.getValue() +
                         HTML_AFTER_TEXT;
                 bw.write(paragraph);
             }
@@ -35,37 +43,6 @@ public class HTMLHandler {
         }
     }
 
-    private void try1() {
-        HtmlView view = StaticHtml
-                .view()
-                .html()
-
-                // region head
-                .head()
-                .meta().attrHttpEquiv(EnumHttpEquivType.CONTENT_TYPE).attrContent("text/html; charset=windows-1252").__()
-                .title().text("OCR").__()
-                .__() //head
-                // endregion head
-
-                // region body
-                .body()
-
-                .p()
-                .img()
-                .attrSrc("http://ct.mob0.com/Fonts/CharacterMap/ocraextended.png")
-
-                .__()
-                .br().__()
-                .text("... Parsed Text ...")
-
-
-                .__()
-                .__()
-                //endregion body
-                .__(); //html
-        String s = view.render();
-        System.out.println(s);
-    }
 
     public static void main(String[] args) {
         HTMLHandler parser = new HTMLHandler();

@@ -145,7 +145,7 @@ public class S3Controller {
         return false;
     }
 
-    public String[] getObject(String bucket, String key) {
+    public String[] getUrls(String bucket, String key) {
         // Get Object
 
         InputStream inputStream = s3.getObject(GetObjectRequest.builder().bucket(bucket).key(key).build(),
