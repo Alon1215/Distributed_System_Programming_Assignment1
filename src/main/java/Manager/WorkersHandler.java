@@ -42,7 +42,7 @@ public class WorkersHandler {
 
     public void handleNewTask(String[] msg_s, String replyUrl){
         //TODO: Debug only:
-        System.out.println("Workers2Manager: " + W2M_queURL);
+        System.out.println("-> Workers2Manager: " + W2M_queURL);
 
 
         String[] urls = s3.getUrls(msg_s[1], msg_s[2]);
@@ -54,7 +54,7 @@ public class WorkersHandler {
 //            for(int i = 0; i < Math.round(requiredWorkers); i++){
 //                createWorker();
 //            }
-            System.out.println("WorkerHandler: need to create new" + Math.round(requiredWorkers) + " workers");
+            System.out.println("-> WorkerHandler: need to create new" + Math.round(requiredWorkers) + " workers");
         }
         amountOfMessagesPerLocal.put(replyUrl, 0);
         identifiedMessages.put(replyUrl, new Vector<Pair<String, String>>());

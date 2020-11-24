@@ -42,7 +42,7 @@ public class LocalApp {
         // 3.1 create SQS for local2manager & manager2local
         SQSController sqsLocal = new SQSController();
         String sqsLocalURL = sqsLocal.createQueue("local" + new Date().getTime());
-
+        System.out.println("-> sqsLocal created");
         // 3.2 Sends a message to an SQS queue
         sqsLocal.sendMessage(manager.getQueueURL(), new TaskProtocol("new task",bucket_key[0], bucket_key[1], sqsLocalURL).toString());
 
