@@ -15,16 +15,16 @@ public class ManagerApp {
         int n = 10; // temp
     // 1. Retrieve sqs url (and create sqs client
         WorkersHandler workersHandler = new WorkersHandler(n);
-        S3Controller s3 = new S3Controller();
+        //S3Controller s3 = new S3Controller();
         SQSController sqsManager = new SQSController();
-        String sqsManagerURL = sqsManager.getQueueURLByName("Manager");
+        String sqsManagerURL = sqsManager.getQueueURLByName("Local2Manager");
         // 2. Manager listen to his sqs queue
         while (true) {
             List<Message> messages = sqsManager.getMessages(sqsManagerURL);
             for( Message msg : messages) {
                 String[] msg_s;
                 if(msg != null) {
-                    msg_s = msg.toString().split("\n");
+                    msg_s = msg.body().split("\n");
                     String type = msg_s[0];
                     String replyUrl = msg_s[3];
                     switch (type) {

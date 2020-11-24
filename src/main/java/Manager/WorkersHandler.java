@@ -51,10 +51,11 @@ public class WorkersHandler {
         //TODO: Create new workers if needed
         double requiredWorkers = (double) urls.length/imagesPerWorker;
         if(requiredWorkers > amountOfActiveWorkers){
-//            for(int i = 0; i < Math.round(requiredWorkers); i++){
+//            for(int i = 0; i < Math.ceil(requiredWorkers); i++){
 //                createWorker();
 //            }
             System.out.println("-> WorkerHandler: need to create new" + Math.round(requiredWorkers) + " workers");
+            amountOfActiveWorkers = (int) Math.ceil(requiredWorkers);
         }
         amountOfMessagesPerLocal.put(replyUrl, 0);
         identifiedMessages.put(replyUrl, new Vector<Pair<String, String>>());
@@ -67,6 +68,7 @@ public class WorkersHandler {
         }
         WorkersListener listener = new WorkersListener(W2M_queURL, amountOfMessagesPerLocal, identifiedMessages, bucket);
         //new Thread(WaitForOutput());
+        listener.run();
     }
     public void createWorker() {
         final String USAGE =

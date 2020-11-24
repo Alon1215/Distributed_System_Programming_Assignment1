@@ -33,7 +33,7 @@ public class ManagerHandler {
             System.out.println("Finished making a Manager");
 
             this.sqsURL = this.sqs.createQueue("Local2Manager");
-            System.out.println("ManagerHandler: Manager queue created");
+            System.out.println("ManagerHandler: Manager queue created URL: " + sqsURL);
 //        }
 //        else{
 //            System.out.println("Manager already exist");

@@ -165,6 +165,7 @@ public class S3Controller {
         StringBuilder sb = new StringBuilder();
         while(sc.hasNext()){
             sb.append(sc.nextLine());
+            sb.append("\n");
         }
      //   System.out.println(sb.toString());
 

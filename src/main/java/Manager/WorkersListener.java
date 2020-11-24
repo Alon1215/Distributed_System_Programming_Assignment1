@@ -35,7 +35,7 @@ public class WorkersListener implements Runnable {
             for (Message msg : messages) {
                 String[] msg_s;
                 if (msg != null) {
-                    msg_s = msg.toString().split("\n");
+                    msg_s = msg.body().split("\n");
                     String type = msg_s[0];
                     String replyUrl = msg_s[3];
                     switch(type){

@@ -31,10 +31,10 @@ public class WorkerApp {
             System.exit(1);
         }
 
-        String replyManagerUrl = args[0]; //worker2manager queue
+        String ManagerQueueUrl = args[0]; //worker2manager queue
         String workersQueueUrl = args[1]; //worker2manager queue
-        workerLoop(replyManagerUrl, workersQueueUrl);
-        //terminateWorker(replyManagerUrl);    // TODO: how to terminate worker (done outside of loop)
+        workerLoop(ManagerQueueUrl, workersQueueUrl);
+        //terminateWorker(ManagerQueueUrl);    // TODO: how to terminate worker (done outside of loop)
 
 
 //        convertDemo("Demo"); // TODO: delete. test only
@@ -50,14 +50,14 @@ public class WorkerApp {
             for (Message msg : messages) {
                 String[] msg_s;
                 if (msg != null) {
-                    msg_s = msg.toString().split("\n");
+                    msg_s = msg.body().split("\n");
                     String type = msg_s[0];
 
                     switch (type) {
-                        case "new ocr task":
+                        case "new image task":
                             String textOutput = img2Txt(msg_s[1]);
                             sqs.sendMessage(managerUrl, new TaskProtocol("done ocr task",msg_s[1], textOutput,msg_s[3]).toString());
-                            sqs.deleteMessages(workersQueueUrl,new ArrayList<>(Collections.singleton(msg)));
+//                            sqs.deleteMessages(workersQueueUrl,new ArrayList<>(Collections.singleton(msg)));
                             break;
 
                         case "termination":
