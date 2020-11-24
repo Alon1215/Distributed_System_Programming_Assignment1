@@ -1,5 +1,6 @@
 package Local;
 
+import com.google.gson.Gson;
 import software.amazon.awssdk.services.sqs.model.Message;
 
 import java.util.Arrays;
@@ -44,7 +45,11 @@ public class LocalApp {
         String sqsLocalURL = sqsLocal.createQueue("local" + new Date().getTime());
         System.out.println("-> sqsLocal created");
         // 3.2 Sends a message to an SQS queue
-        sqsLocal.sendMessage(manager.getQueueURL(), new TaskProtocol("new task",bucket_key[0], bucket_key[1], sqsLocalURL).toString());
+
+        // TODO: ALON 24.11 23:00 : changed TaskProtocol.toString() to json
+//        sqsLocal.sendMessage(manager.getQueueURL(), new TaskProtocol("new task",bucket_key[0], bucket_key[1], sqsLocalURL).toString());
+        Gson gson = new Gson();
+        sqsLocal.sendMessage(manager.getQueueURL(), gson.toJson(new TaskProtocol("new task",bucket_key[0], bucket_key[1], sqsLocalURL)));
 
         if (isTerminating){
             sqsLocal.sendMessage(manager.getQueueURL(), new TaskProtocol("terminate","", "", "").toString());
@@ -57,13 +62,21 @@ public class LocalApp {
         while(!isDone){
             List<Message> messages = sqsLocal.getMessages(sqsLocalURL);
             for( Message msg : messages) {
-                String[] msg_s;
+//                String[] msg_s;
                 if (msg != null) {
-                    msg_s = msg.toString().split("\n");
-                    String type = msg_s[0];
+
+                    // TODO: ALON 24.11 23:00 : changed TaskProtocol.toString() to json
+//                    msg_s = msg.body().split("\n");
+//                    String type = msg_s[0];
+                    TaskProtocol msg_parsed = gson.fromJson(msg.body(),TaskProtocol.class);
+                    String type = msg_parsed.getType();
+
                     if (type.equals("done task")) {
                         System.out.println("Summary file received");
-                        s3.downloadSummaryFile(msg_s[1], msg_s[2], outputFileName);
+
+//                        s3.downloadSummaryFile(msg_s[1], msg_s[2], outputFileName); // TODO: ALON 24.11 23:00 : changed TaskProtocol.toString() to json
+                        s3.downloadSummaryFile(msg_parsed.getField1(), msg_parsed.getField2(), outputFileName);
+
                         isDone = true;
                     } else {
                         System.out.println("ERROR Occurred, mission didn't accomplished");

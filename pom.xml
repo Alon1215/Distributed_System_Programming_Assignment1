@@ -47,6 +47,13 @@
             <artifactId>sqs</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.3.1</version>
+        </dependency>
+
+
         <!-- https://mvnrepository.com/artifact/net.sourceforge.javaocr/javaocr-core -->
         <dependency>
             <groupId>net.sourceforge.javaocr</groupId>

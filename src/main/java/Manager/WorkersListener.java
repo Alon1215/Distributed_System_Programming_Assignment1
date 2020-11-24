@@ -3,6 +3,7 @@ package Manager;
 import Local.S3Controller;
 import Local.SQSController;
 import Local.TaskProtocol;
+import com.google.gson.Gson;
 import com.sun.istack.internal.NotNull;
 import javafx.util.Pair;
 import software.amazon.awssdk.services.sqs.model.Message;
@@ -29,18 +30,26 @@ public class WorkersListener implements Runnable {
 
     @Override
     public void run() {
-
+        Gson gson = new Gson();
         while (amountOfMessagesPerLocal.size() > 0) {
             List<Message> messages = sqsController.getMessages(sqsUrl);
             for (Message msg : messages) {
-                String[] msg_s;
+//                String[] msg_s;
                 if (msg != null) {
-                    msg_s = msg.body().split("\n");
-                    String type = msg_s[0];
-                    String replyUrl = msg_s[3];
+
+                    // TODO: ALON 24.11 23:00 : changed TaskProtocol.toString() to json
+//                    msg_s = msg.body().split("\n");
+//                    String type = msg_s[0];
+//                    String replyUrl = msg_s[3];
+                    TaskProtocol msg_parsed = gson.fromJson(msg.body(),TaskProtocol.class);
+                    String type = msg_parsed.getType();
+                    String replyUrl = msg_parsed.getReplyURL();
+
                     switch(type){
                         case "done OCR task":
-                            Pair<String, String> img_identified_text = new Pair<String, String>(msg_s[1], msg_s[2]);
+//                            Pair<String, String> img_identified_text = new Pair<String, String>(msg_s[1], msg_s[2]); // TODO: ALON 24.11 23:00
+                            Pair<String, String> img_identified_text = new Pair<String, String>(msg_parsed.getField1(), msg_parsed.getField2());
+
                             identifiedMessages.get(replyUrl).add(img_identified_text);
                             amountOfMessagesPerLocal.replace(replyUrl, amountOfMessagesPerLocal.get(replyUrl) - 1);
                             if (amountOfMessagesPerLocal.get(replyUrl) <= 0) {
@@ -53,7 +62,7 @@ public class WorkersListener implements Runnable {
                             //TaskProtocol task = new TaskProtocol("done task", )
                             break;
                         case "termination":
-                            //TODO: DELETE LATER
+                            //TODO: DELETE LATER (change to handle workers deaths
                             System.out.println("Terminating thread W2M Listener");
                             System.exit(1);
                             break;
@@ -70,6 +79,10 @@ public class WorkersListener implements Runnable {
         Vector<Pair<String, String>> imageData = identifiedMessages.get(replyUrl);
         File f = HTMLHandler.parseListOfUrlAndTextToHTML(imageData, replyUrl);
         String[] bucket_key = s3Controller.putInputInBucket(f != null ? f.getAbsolutePath() : null, bucket, "summary" + System.currentTimeMillis());
-        sqsController.sendMessage(replyUrl, new TaskProtocol("done task", bucket_key[0], bucket_key[1], "").toString());
+
+        // TODO: ALON 24.11 23:00
+//        sqsController.sendMessage(replyUrl, new TaskProtocol("done task", bucket_key[0], bucket_key[1], "").toString());
+        Gson gson = new Gson();
+        sqsController.sendMessage(replyUrl, gson.toJson(new TaskProtocol("done task", bucket_key[0], bucket_key[1], "")));
     }
 }

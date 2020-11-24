@@ -59,12 +59,16 @@ public class SQSController {
 
     public void deleteMessages(String queueURL, List<Message> messages){
         for (Message m : messages) {
-            DeleteMessageRequest deleteRequest = DeleteMessageRequest.builder()
-                    .queueUrl(queueURL)
-                    .receiptHandle(m.receiptHandle())
-                    .build();
-            sqs.deleteMessage(deleteRequest);
+            deleteSingleMessage(queueURL, m);
         }
+    }
+
+    private void deleteSingleMessage(String queueURL, Message m) {
+        DeleteMessageRequest deleteRequest = DeleteMessageRequest.builder()
+                .queueUrl(queueURL)
+                .receiptHandle(m.receiptHandle())
+                .build();
+        sqs.deleteMessage(deleteRequest);
     }
 
 

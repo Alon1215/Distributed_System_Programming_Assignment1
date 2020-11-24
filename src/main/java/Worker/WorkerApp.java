@@ -9,6 +9,7 @@ import java.io.FileNotFoundException;  // Import this class to handle errors
 import java.io.IOException;
 import java.net.MalformedURLException;
 
+import com.google.gson.Gson;
 import net.sourceforge.tess4j.Tesseract;
 import net.sourceforge.tess4j.TesseractException;
 import software.amazon.awssdk.services.sqs.model.Message;
@@ -43,20 +44,31 @@ public class WorkerApp {
 
     private static void workerLoop(String managerUrl, String workersQueueUrl) {
         SQSController sqs = new SQSController();
+        Gson gson = new Gson();
         boolean isTerminated = false;
 
         while (!isTerminated) {
             List<Message> messages = sqs.getMessages(workersQueueUrl);
             for (Message msg : messages) {
-                String[] msg_s;
+//                String[] msg_s;
                 if (msg != null) {
-                    msg_s = msg.body().split("\n");
-                    String type = msg_s[0];
+
+                    // TODO: ALON 24.11 23:00 : changed TaskProtocol.toString() to json
+//                    msg_s = msg.body().split("\n");
+//                    String type = msg_s[0];
+                    TaskProtocol msg_parsed = gson.fromJson(msg.body(),TaskProtocol.class);
+                    String type = msg_parsed.getType();
 
                     switch (type) {
                         case "new image task":
-                            String textOutput = img2Txt(msg_s[1]);
-                            sqs.sendMessage(managerUrl, new TaskProtocol("done ocr task",msg_s[1], textOutput,msg_s[3]).toString());
+//                            String textOutput = img2Txt(msg_s[1]);
+//                            sqs.sendMessage(managerUrl, new TaskProtocol("done ocr task",msg_s[1], textOutput,msg_s[3]).toString());
+                            String textOutput = img2Txt(msg_parsed.getField1());
+
+                            // TODO: ALON 24.11 23:00
+//                            sqs.sendMessage(managerUrl, new TaskProtocol("done ocr task",msg_s[1], textOutput,msg_s[3]).toString());
+                            sqs.sendMessage(managerUrl, gson.toJson(new TaskProtocol("done ocr task", msg_parsed.getField1(), textOutput, msg_parsed.getReplyURL())));
+//
 //                            sqs.deleteMessages(workersQueueUrl,new ArrayList<>(Collections.singleton(msg)));
                             break;
 

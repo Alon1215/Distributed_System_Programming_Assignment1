@@ -1,5 +1,6 @@
 package Manager;
 import Local.*;
+import com.google.gson.Gson;
 import javafx.util.Pair;
 import software.amazon.awssdk.services.sqs.model.Message;
 
@@ -18,19 +19,28 @@ public class ManagerApp {
         //S3Controller s3 = new S3Controller();
         SQSController sqsManager = new SQSController();
         String sqsManagerURL = sqsManager.getQueueURLByName("Local2Manager");
+
         // 2. Manager listen to his sqs queue
+
+        Gson gson = new Gson();
         while (true) {
             List<Message> messages = sqsManager.getMessages(sqsManagerURL);
             for( Message msg : messages) {
-                String[] msg_s;
+//                String[] msg_s;
                 if(msg != null) {
-                    msg_s = msg.body().split("\n");
-                    String type = msg_s[0];
-                    String replyUrl = msg_s[3];
+
+                    // TODO: ALON 24.11 23:00 : changed TaskProtocol.toString() to json
+//                    msg_s = msg.body().split("\n");
+//                    String type = msg_s[0];
+//                    String replyUrl = msg_s[3];
+                    TaskProtocol msg_parsed = gson.fromJson(msg.body(),TaskProtocol.class);
+                    String type = msg_parsed.getType();
+                    String replyUrl = msg_parsed.getReplyURL();
+
                     switch (type) {
                         case "new task":
-                            //String[] msgArr = s3.getUrls(msg_s[1], msg_s[2]);
-                            workersHandler.handleNewTask(msg_s, replyUrl);
+//                            workersHandler.handleNewTask(msg_s, replyUrl); // TODO: ALON 24.11 23:00 : changed TaskProtocol.toString() to json
+                            workersHandler.handleNewTask(msg_parsed, replyUrl);
                             break;
                         case "done OCR task":
 

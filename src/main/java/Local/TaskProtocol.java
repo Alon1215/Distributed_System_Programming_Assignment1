@@ -1,7 +1,7 @@
 package Local;
 
 
-public class    TaskProtocol {
+public class TaskProtocol {
     private final String type; // new task / termination
     private final String field1;
     private final String field2;
@@ -12,6 +12,22 @@ public class    TaskProtocol {
         this.field1 = field1;
         this.field2 = field2;
         this.replyURL = replyURL;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public String getField1() {
+        return field1;
+    }
+
+    public String getField2() {
+        return field2;
+    }
+
+    public String getReplyURL() {
+        return replyURL;
     }
 
     @Override

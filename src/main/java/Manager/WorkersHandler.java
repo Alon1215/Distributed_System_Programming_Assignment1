@@ -3,6 +3,7 @@ package Manager;
 import Local.S3Controller;
 import Local.SQSController;
 import Local.TaskProtocol;
+import com.google.gson.Gson;
 import javafx.util.Pair;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.ec2.Ec2Client;
@@ -40,14 +41,20 @@ public class WorkersHandler {
         workersInstances = new ArrayList<String>();
     }
 
-    public void handleNewTask(String[] msg_s, String replyUrl){
+    public void handleNewTask(TaskProtocol msg_parsed, String replyUrl){
         //TODO: Debug only:
         System.out.println("-> Workers2Manager: " + W2M_queURL);
 
+        // TODO: ALON 24.11 23:00 : changed TaskProtocol.toString() to json
+//        String[] urls = s3.getUrls(msg_s[1], msg_s[2]);
+//        String bucket = msg_s[1];
+//        String key = msg_s[2];
+        String bucket = msg_parsed.getField1();
+        String key = msg_parsed.getField2();
+        String[] urls = s3.getUrls(bucket, key);
 
-        String[] urls = s3.getUrls(msg_s[1], msg_s[2]);
-        String bucket = msg_s[1];
-        String key = msg_s[2];
+
+
         //TODO: Create new workers if needed
         double requiredWorkers = (double) urls.length/imagesPerWorker;
         if(requiredWorkers > amountOfActiveWorkers){
@@ -61,9 +68,13 @@ public class WorkersHandler {
         identifiedMessages.put(replyUrl, new Vector<Pair<String, String>>());
         amountOfMessagesPerLocal.replace(replyUrl, amountOfMessagesPerLocal.get(replyUrl) + urls.length);
 
+        Gson gson = new Gson();
         for(String imageUrl: urls){
-            TaskProtocol task = new TaskProtocol("new image task", imageUrl, "", replyUrl);
-            sqsController.sendMessage(M2W_queURL, task.toString());
+
+            // TODO: ALON 24.11 23:00 : changed TaskProtocol.toString() to json
+//            TaskProtocol task = new TaskProtocol("new image task", imageUrl, "", replyUrl);
+//            sqsController.sendMessage(M2W_queURL, task.toString());
+            sqsController.sendMessage(M2W_queURL, gson.toJson(new TaskProtocol("new image task", imageUrl, "", replyUrl)));
 
         }
         WorkersListener listener = new WorkersListener(W2M_queURL, amountOfMessagesPerLocal, identifiedMessages, bucket);
