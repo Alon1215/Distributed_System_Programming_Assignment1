@@ -37,7 +37,7 @@ public class ManagerApp {
                             //TaskProtocol task = new TaskProtocol("done task", )
                             break;
                         case "termination":
-                            //DELETE LATER
+                            //TODO: DELETE LATER
                             System.exit(1);
                             break;
                         default:

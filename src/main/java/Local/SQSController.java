@@ -88,7 +88,7 @@ public class SQSController {
             try {
                 CreateQueueRequest request = CreateQueueRequest.builder()
                         .queueName(sqsName)
-                        .build(); // TODO: Alon 14.11: if name is unique (here), some trouble with manager might occur
+                        .build();
                 CreateQueueResponse create_result = sqs.createQueue(request);
             } catch (QueueNameExistsException e) {
                 throw e;

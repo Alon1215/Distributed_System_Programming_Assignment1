@@ -14,7 +14,7 @@ import java.util.Date;
 import java.util.List;
 
 public class ManagerHandler {
-    private SQSController sqs;
+    private SQSController sqs = new SQSController();
     private final Ec2Client ec2;
     private final String name = "Manager";
     private final String amiId = "ami-076515f20540e6e0b";
@@ -28,19 +28,18 @@ public class ManagerHandler {
                 .build();
 
         // create new instance (if needed) & set sqs url
-        if (!checkIfManagerExist()) {
-            createInstance();
+//        if (!checkIfManagerExist()) {
+//            createInstance();
             System.out.println("Finished making a Manager");
 
-//            sqsURL = sqs.createQueue("Manager");
-
-        }
-        else{
-            System.out.println("Manager already exist");
-
-            // TODO: ALON 14.11:
-            this.sqsURL = sqs.getQueueURLByName("Manager");
-        }
+            this.sqsURL = this.sqs.createQueue("Local2Manager");
+//        }
+//        else{
+//            System.out.println("Manager already exist");
+//
+//            // TODO: ALON 14.11:
+//            this.sqsURL = sqs.getQueueURLByName("Local2Manager");
+//        }
     }
 
     private boolean checkIfManagerExist() {
@@ -109,8 +108,7 @@ public class ManagerHandler {
                     "Successfully started EC2 instance %s based on AMI %s",
                     instanceId, amiId);
 
-            this.sqs = new SQSController();
-            this.sqsURL = this.sqs.createQueue("Manager");
+
 
         } catch (Ec2Exception e) {
             System.err.println(e.getMessage());
