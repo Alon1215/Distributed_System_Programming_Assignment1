@@ -9,7 +9,7 @@ import java.util.List;
 public class EC2 {
     Ec2Client ec2 = null;
     String name = "Manager";
-    String amiId = "ami-076515f20540e6e0b";
+    String amiId = "ami-03fb8155c2b349f7a";
     String instanceId;
 
     public EC2(){
