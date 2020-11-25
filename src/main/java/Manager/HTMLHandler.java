@@ -13,9 +13,9 @@ import java.util.Vector;
 
 public class HTMLHandler {
 
-    public static File parseListOfUrlAndTextToHTML(Vector<Pair<String,String>> urlsToText, String replyUrl){
+    public static File makeHTMLSummaryFile(Vector<Pair<String,String>> urlsToText){
 
-        File f = new File(replyUrl+".html");
+        File f = new File("summary" + System.currentTimeMillis() +".html");
         try{
             BufferedWriter bw = new BufferedWriter(new FileWriter(f));
             bw.write("<html>\n\t<head>\n\t<meta http-equiv=\"Content-Type\" content=\"text/html; charset=windows-1252\"><title>OCR</title>\n\t</head>\n\t<body>\n");

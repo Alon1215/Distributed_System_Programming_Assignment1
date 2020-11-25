@@ -8,6 +8,7 @@ import javafx.util.Pair;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.ec2.Ec2Client;
 import software.amazon.awssdk.services.ec2.model.*;
+import software.amazon.awssdk.services.sqs.model.Message;
 
 import java.util.ArrayList;
 import java.util.Base64;
@@ -62,6 +63,8 @@ public class WorkersHandler {
 //                createWorker();
 //            }
             System.out.println("-> WorkerHandler: need to create new" + Math.round(requiredWorkers) + " workers");
+            System.out.println("DEBUG: " + W2M_queURL + " " + M2W_queURL);
+
             amountOfActiveWorkers = (int) Math.ceil(requiredWorkers);
         }
         amountOfMessagesPerLocal.put(replyUrl, 0);
@@ -74,11 +77,13 @@ public class WorkersHandler {
             // TODO: ALON 24.11 23:00 : changed TaskProtocol.toString() to json
 //            TaskProtocol task = new TaskProtocol("new image task", imageUrl, "", replyUrl);
 //            sqsController.sendMessage(M2W_queURL, task.toString());
+            //currentMessages.add()
             sqsController.sendMessage(M2W_queURL, gson.toJson(new TaskProtocol("new image task", imageUrl, "", replyUrl)));
 
         }
         WorkersListener listener = new WorkersListener(W2M_queURL, amountOfMessagesPerLocal, identifiedMessages, bucket);
         //new Thread(WaitForOutput());
+        System.out.println("W2M" + W2M_queURL + "\nM2W" + M2W_queURL);
         listener.run();
     }
     public void createWorker() {

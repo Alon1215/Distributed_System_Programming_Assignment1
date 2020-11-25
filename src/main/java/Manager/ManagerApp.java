@@ -42,10 +42,6 @@ public class ManagerApp {
 //                            workersHandler.handleNewTask(msg_s, replyUrl); // TODO: ALON 24.11 23:00 : changed TaskProtocol.toString() to json
                             workersHandler.handleNewTask(msg_parsed, replyUrl);
                             break;
-                        case "done OCR task":
-
-                            //TaskProtocol task = new TaskProtocol("done task", )
-                            break;
                         case "termination":
                             //TODO: DELETE LATER
                             System.exit(1);
@@ -54,6 +50,7 @@ public class ManagerApp {
                             // not suppose to happen
                             break;
                     }
+                    sqsManager.deleteSingleMessage(sqsManagerURL, msg);
                 }
                 // 2.1 If the message is that of a new task it:
 

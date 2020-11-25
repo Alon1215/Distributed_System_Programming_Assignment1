@@ -20,7 +20,7 @@ public class LocalApp {
         String outputFile = args[1];
         int n = Integer.parseInt(args[2]);
         */
-        String inputFileName = "text.images.txt";
+        String inputFileName = "input1task.txt";
         String outputFileName = "output";
         int n_input = 10; // TODO: implement n as input throughout application
         boolean isTerminating = (args.length == 4 && args[3].equals("terminate"));
@@ -81,6 +81,7 @@ public class LocalApp {
                     } else {
                         System.out.println("ERROR Occurred, mission didn't accomplished");
                     }
+                    sqsLocal.deleteSingleMessage(sqsLocalURL, msg);
 
                 }
             }

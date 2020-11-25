@@ -119,16 +119,16 @@ public class S3Controller {
             bytes = Files.readAllBytes(Paths.get(path));
         } catch (IOException e) {
             //e.printStackTrace();
-            System.out.println("Input file not found");
+            System.out.println("putInputInBucket: ERROR Input file not found");
             return new String[]{"ERROR"};
         }
         ByteBuffer buffer = ByteBuffer.wrap(bytes);
 
         // Put Object
-        s3.putObject(PutObjectRequest.builder().bucket(this.bucketName).key(this.keyName)
+        s3.putObject(PutObjectRequest.builder().bucket(bucketName).key(keyName)
                         .build(),
                 RequestBody.fromByteBuffer(buffer));
-        return new String[]{this.bucketName, this.keyName};
+        return new String[]{bucketName, keyName};
 
 
     }

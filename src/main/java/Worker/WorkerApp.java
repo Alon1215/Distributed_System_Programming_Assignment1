@@ -33,7 +33,7 @@ public class WorkerApp {
         }
 
         String ManagerQueueUrl = args[0]; //worker2manager queue
-        String workersQueueUrl = args[1]; //worker2manager queue
+        String workersQueueUrl = args[1]; //manager2workers queue
         workerLoop(ManagerQueueUrl, workersQueueUrl);
         //terminateWorker(ManagerQueueUrl);    // TODO: how to terminate worker (done outside of loop)
 
@@ -67,12 +67,12 @@ public class WorkerApp {
 
                             // TODO: ALON 24.11 23:00
 //                            sqs.sendMessage(managerUrl, new TaskProtocol("done ocr task",msg_s[1], textOutput,msg_s[3]).toString());
-                            sqs.sendMessage(managerUrl, gson.toJson(new TaskProtocol("done ocr task", msg_parsed.getField1(), textOutput, msg_parsed.getReplyURL())));
+                            sqs.sendMessage(managerUrl, gson.toJson(new TaskProtocol("done OCR task", msg_parsed.getField1(), textOutput, msg_parsed.getReplyURL())));
 //
-//                            sqs.deleteMessages(workersQueueUrl,new ArrayList<>(Collections.singleton(msg)));
                             break;
 
                         case "termination":
+                            sqs.sendMessage(managerUrl, gson.toJson(new TaskProtocol("worker terminated", " ", " ", " ")));
                             isTerminated = true;
                             break;
                         default:
@@ -80,6 +80,8 @@ public class WorkerApp {
                             System.out.println("Bad task protocol");
                             break;
                     }
+                    sqs.deleteSingleMessage(workersQueueUrl,msg);
+
                 }
             }
         }

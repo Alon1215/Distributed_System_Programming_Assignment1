@@ -20,6 +20,7 @@ public class WorkersListener implements Runnable {
     ConcurrentHashMap<String, Integer> amountOfMessagesPerLocal;
     ConcurrentHashMap<String, Vector<Pair<String, String>>> identifiedMessages;
     String bucket;
+
     public WorkersListener(String sqsUrl, ConcurrentHashMap<String, Integer> amountOfMessagesPerLocal, ConcurrentHashMap<String, Vector<Pair<String, String>>> identifiedMessages, String bucket) {
         this.bucket = bucket;
         this.sqsController = new SQSController();
@@ -61,8 +62,8 @@ public class WorkersListener implements Runnable {
                             }
                             //TaskProtocol task = new TaskProtocol("done task", )
                             break;
-                        case "termination":
-                            //TODO: DELETE LATER (change to handle workers deaths
+                        case "terminated":
+                            //TODO: DELETE LATER (change to handle workers deaths)
                             System.out.println("Terminating thread W2M Listener");
                             System.exit(1);
                             break;
@@ -77,8 +78,8 @@ public class WorkersListener implements Runnable {
 
     private void doneTask(String replyUrl, String bucket) {
         Vector<Pair<String, String>> imageData = identifiedMessages.get(replyUrl);
-        File f = HTMLHandler.parseListOfUrlAndTextToHTML(imageData, replyUrl);
-        String[] bucket_key = s3Controller.putInputInBucket(f != null ? f.getAbsolutePath() : null, bucket, "summary" + System.currentTimeMillis());
+        File f = HTMLHandler.makeHTMLSummaryFile(imageData);
+        String[] bucket_key = s3Controller.putInputInBucket(f != null ? f.getPath() : null, bucket, "summary");
 
         // TODO: ALON 24.11 23:00
 //        sqsController.sendMessage(replyUrl, new TaskProtocol("done task", bucket_key[0], bucket_key[1], "").toString());

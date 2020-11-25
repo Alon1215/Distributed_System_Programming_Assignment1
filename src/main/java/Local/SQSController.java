@@ -53,6 +53,7 @@ public class SQSController {
     public List<Message> getMessages(String queueURL){
         ReceiveMessageRequest receiveRequest = ReceiveMessageRequest.builder()
                 .queueUrl(queueURL)
+                .visibilityTimeout(60)
                 .build();
         return sqs.receiveMessage(receiveRequest).messages();
     }
@@ -63,7 +64,7 @@ public class SQSController {
         }
     }
 
-    private void deleteSingleMessage(String queueURL, Message m) {
+    public void deleteSingleMessage(String queueURL, Message m) {
         DeleteMessageRequest deleteRequest = DeleteMessageRequest.builder()
                 .queueUrl(queueURL)
                 .receiptHandle(m.receiptHandle())
