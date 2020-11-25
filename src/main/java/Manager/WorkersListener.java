@@ -4,7 +4,6 @@ import Local.S3Controller;
 import Local.SQSController;
 import Local.TaskProtocol;
 import com.google.gson.Gson;
-import com.sun.istack.internal.NotNull;
 import javafx.util.Pair;
 import software.amazon.awssdk.services.sqs.model.Message;
 
@@ -17,7 +16,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class WorkersListener implements Runnable {
     SQSController sqsController;
     S3Controller s3Controller = new S3Controller();
-    String sqsUrl;
+    String W2M_SQSQueURL;
     ConcurrentHashMap<String, Integer> amountOfMessagesPerLocal;
     ConcurrentHashMap<String, Vector<Pair<String, String>>> identifiedMessages;
     String bucket;
@@ -25,11 +24,11 @@ public class WorkersListener implements Runnable {
 
     AtomicInteger activeWorkersNumber;
 
-    public WorkersListener(AtomicInteger activeWorkersNumber,String sqsUrl, ConcurrentHashMap<String, Integer> amountOfMessagesPerLocal, ConcurrentHashMap<String, Vector<Pair<String, String>>> identifiedMessages, String bucket) {
+    public WorkersListener(AtomicInteger activeWorkersNumber, String W2M_SQSQueURL, ConcurrentHashMap<String, Integer> amountOfMessagesPerLocal, ConcurrentHashMap<String, Vector<Pair<String, String>>> identifiedMessages, String bucket) {
         this.activeWorkersNumber = activeWorkersNumber;
         this.bucket = bucket;
         this.sqsController = new SQSController();
-        this.sqsUrl = sqsUrl;
+        this.W2M_SQSQueURL = W2M_SQSQueURL;
         this.amountOfMessagesPerLocal = amountOfMessagesPerLocal;
         this.identifiedMessages = identifiedMessages;
     }
@@ -37,7 +36,7 @@ public class WorkersListener implements Runnable {
     @Override
     public void run() {
         while (activeWorkersNumber.get() > 0) {
-            List<Message> messages = sqsController.getMessages(sqsUrl);
+            List<Message> messages = sqsController.getMessages(W2M_SQSQueURL);
             for (Message msg : messages) {
                 if (msg != null) {
 
@@ -58,7 +57,7 @@ public class WorkersListener implements Runnable {
                                 amountOfMessagesPerLocal.remove(replyUrl);
                             }
                             break;
-                        case "worker terminated":
+                        case "worker died":
                             System.out.println("Terminating thread W2M Listener");
                             activeWorkersNumber.decrementAndGet();
                             break;
@@ -66,6 +65,7 @@ public class WorkersListener implements Runnable {
                             // not suppose to happen
                             break;
                     }
+                    sqsController.deleteSingleMessage(W2M_SQSQueURL, msg);
                 }
             }
         }

@@ -26,23 +26,17 @@ public class ManagerApp {
         while (!isTerminated) {
             List<Message> messages = sqsManager.getMessages(sqsManagerURL);
             for( Message msg : messages) {
-//                String[] msg_s;
                 if(msg != null) {
 
-                    // TODO: ALON 24.11 23:00 : changed TaskProtocol.toString() to json
-//                    msg_s = msg.body().split("\n");
-//                    String type = msg_s[0];
-//                    String replyUrl = msg_s[3];
                     TaskProtocol msg_parsed = gson.fromJson(msg.body(),TaskProtocol.class);
                     String type = msg_parsed.getType();
                     String replyUrl = msg_parsed.getReplyURL();
 
                     switch (type) {
                         case "new task":
-//                            workersHandler.handleNewTask(msg_s, replyUrl); // TODO: ALON 24.11 23:00 : changed TaskProtocol.toString() to json
                             workersHandler.handleNewTask(msg_parsed, replyUrl);
                             break;
-                        case "termination":
+                        case "terminate":
                             workersHandler.handleTermination();
                             isTerminated = true;
                             break;
@@ -52,7 +46,8 @@ public class ManagerApp {
                     }
                     sqsManager.deleteSingleMessage(sqsManagerURL, msg);
                 }
-                sqsManager.deleteQueue(sqsManagerURL);
+
+
                 // 2.1 If the message is that of a new task it:
 
                     // 2.1.1 The manager should create a worker for every n messages, if there are no running workers.
@@ -69,6 +64,8 @@ public class ManagerApp {
             }
 
         }
+        sqsManager.deleteQueue(sqsManagerURL);
+
     }
 
 }

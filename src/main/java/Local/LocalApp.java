@@ -21,7 +21,7 @@ public class LocalApp {
         int n = Integer.parseInt(args[2]);
         */
         String inputFileName = "input1task.txt";
-        String outputFileName = "output";
+        String outputFileName = "output" + System.currentTimeMillis();
         int n_input = 10; // TODO: implement n as input throughout application
         boolean isTerminating = (args.length == 4 && args[3].equals("terminate"));
     // 1. Check if manager node is active (if not, initiate)
@@ -51,9 +51,7 @@ public class LocalApp {
         Gson gson = new Gson();
         sqsLocal.sendMessage(manager.getQueueURL(), gson.toJson(new TaskProtocol("new task",bucket_key[0], bucket_key[1], sqsLocalURL)));
 
-        if (isTerminating){
-            sqsLocal.sendMessage(manager.getQueueURL(), new TaskProtocol("terminate","", "", "").toString());
-        }
+
 
         // 4. Checks an SQS queue for a message indicating the process is done and the response (the summary file) is available on S3.
         sqsLocal.getMessages(sqsLocalURL);
@@ -76,6 +74,9 @@ public class LocalApp {
                         s3.emptyObjectFromBucket(bucketName, inputKey);
                         s3.emptyObjectFromBucket(bucketName, outputKey);
                         s3.deleteBucket(bucketName);
+                        if (isTerminating){
+                            sqsLocal.sendMessage(manager.getQueueURL(), gson.toJson(new TaskProtocol("terminate","", "", "")));
+                        }
                         isDone = true;
                     } else {
                         System.out.println("ERROR Occurred, mission didn't accomplished");

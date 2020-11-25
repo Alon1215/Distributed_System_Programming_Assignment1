@@ -86,6 +86,7 @@ public class SQSController {
                         .build();
                 CreateQueueResponse create_result = sqs.createQueue(request);
             } catch (QueueNameExistsException e) {
+                System.err.println("SQS Error: wait 60 seconds before creating SQS queue with the name: " + sqsName);
                 throw e;
             }
             GetQueueUrlRequest getQueueRequest = GetQueueUrlRequest.builder()

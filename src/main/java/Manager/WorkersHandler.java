@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
 import java.util.Vector;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class WorkersHandler {
@@ -26,7 +26,7 @@ public class WorkersHandler {
     private final String M2W_queURL;
     private final String W2M_queURL;
     private final Ec2Client ec2;
-
+    ExecutorService workersListenerPool = Executors.newFixedThreadPool(2);
     private final ArrayList<String> workersInstances;
     private final S3Controller s3 = new S3Controller();
     private final SQSController sqsController = new SQSController();
@@ -75,9 +75,7 @@ public class WorkersHandler {
 
         }
         WorkersListener listener = new WorkersListener(amountOfActiveWorkers,W2M_queURL, amountOfMessagesPerLocal, identifiedMessages, bucket);
-        //new Thread(WaitForOutput());
-        System.out.println("W2M" + W2M_queURL + "\nM2W" + M2W_queURL);
-        listener.run();
+        workersListenerPool.execute(listener);
     }
     public void createWorker() {
         final String USAGE =
@@ -128,7 +126,12 @@ public class WorkersHandler {
         for(int i = 0; i < amountOfActiveWorkers.get(); i++){
             sqsController.sendMessage(M2W_queURL, gson.toJson(new TaskProtocol("terminate worker", "", "", "")));
         }
-        //TODO: join with the worker listener thread pool
+        workersListenerPool.shutdown();
+        try {
+            workersListenerPool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+        } catch (InterruptedException e) {
+            System.err.println(e.toString());
+        }
         sqsController.deleteQueue(M2W_queURL);
         sqsController.deleteQueue(W2M_queURL);
 

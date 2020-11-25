@@ -50,12 +50,8 @@ public class WorkerApp {
         while (!isTerminated) {
             List<Message> messages = sqs.getMessages(workersQueueUrl);
             for (Message msg : messages) {
-//                String[] msg_s;
                 if (msg != null) {
 
-                    // TODO: ALON 24.11 23:00 : changed TaskProtocol.toString() to json
-//                    msg_s = msg.body().split("\n");
-//                    String type = msg_s[0];
                     TaskProtocol msg_parsed = gson.fromJson(msg.body(),TaskProtocol.class);
                     String type = msg_parsed.getType();
 
@@ -67,8 +63,8 @@ public class WorkerApp {
 
                             break;
 
-                        case "termination":
-                            sqs.sendMessage(managerUrl, gson.toJson(new TaskProtocol("worker terminated", " ", " ", " ")));
+                        case "terminate worker":
+                            sqs.sendMessage(managerUrl, gson.toJson(new TaskProtocol("worker died", " ", " ", " ")));
                             isTerminated = true;
                             break;
                         default:
