@@ -21,7 +21,7 @@ public class ManagerHandler {
     private String instanceId;
     private String sqsURL;
 
-    public ManagerHandler() {
+    public ManagerHandler(int n_input) {
         // create ec2 clients
         ec2 = Ec2Client.builder()
                 .region(Region.US_EAST_1)
@@ -29,7 +29,7 @@ public class ManagerHandler {
 
         // create new instance (if needed) & set sqs url
 //        if (!checkIfManagerExist()) {
-//            createInstance();
+//            createInstance(n_input);
             System.out.println("Finished making a Manager");
 
             this.sqsURL = this.sqs.createQueue("Local2Manager");
@@ -70,16 +70,13 @@ public class ManagerHandler {
      * Create EC2 for manager node & create new sqs queue for local to manager communication
      * (manager listen to queue)
      */
-    public void createInstance(){
+    public void createInstance(int n_input){
 
         final String USAGE =
                 "To run this example, supply an instance name and AMI image id\n" +
                         "Both values can be obtained from the AWS Console\n" +
                         "Ex: CreateInstance <instance-name> <ami-image-id>\n";
 
-
-        // snippet-start:[ec2.java2.create_instance.main]
-        //  client = Ec2Client.create();
 
         RunInstancesRequest runRequest = RunInstancesRequest.builder()
                 .instanceType(InstanceType.T2_MICRO)

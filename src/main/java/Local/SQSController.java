@@ -19,24 +19,11 @@ import java.awt.*;
 
 public class SQSController {
     public SqsClient sqs;
-    private String queueURL;
 
     public SQSController(){
         sqs = SqsClient.builder()
                 .region(Region.US_EAST_1)
                 .build();
-//        try {
-//            CreateQueueRequest request = CreateQueueRequest.builder()
-//                    .queueName(sqsName + new Date().getTime())
-//                    .build(); // TODO: Alon 14.11: if name is unique (here), some trouble with manager might occur
-//            CreateQueueResponse create_result = sqs.createQueue(request);
-//        } catch (QueueNameExistsException e) {
-//            throw e;
-//        }
-//        GetQueueUrlRequest getQueueRequest = GetQueueUrlRequest.builder()
-//                .queueName(sqsName)
-//                .build();
-//        this.queueURL = sqs.getQueueUrl(getQueueRequest).queueUrl();
     }
 
 
@@ -72,7 +59,6 @@ public class SQSController {
         sqs.deleteMessage(deleteRequest);
     }
 
-
     public String getQueueURLByName(String sqsName) {
         GetQueueUrlRequest getQueueRequest = GetQueueUrlRequest.builder()
                 .queueName(sqsName)
@@ -80,11 +66,15 @@ public class SQSController {
         return sqs.getQueueUrl(getQueueRequest).queueUrl();
     }
 
-    public String getQueueURL() {
-        return queueURL;
-    }
 
+    public void deleteQueue(String queueURL){
+        DeleteQueueRequest deleteQueueRequest = DeleteQueueRequest.builder()
+                .queueUrl(queueURL)
+                .build();
+        sqs.deleteQueue(deleteQueueRequest);
+    }
     public String createQueue(String sqsName) {
+        String queueUrl = "";
         try {
             sqs = SqsClient.builder()
                     .region(Region.US_EAST_1)
@@ -101,11 +91,11 @@ public class SQSController {
             GetQueueUrlRequest getQueueRequest = GetQueueUrlRequest.builder()
                     .queueName(sqsName)
                     .build();
-            this.queueURL = sqs.getQueueUrl(getQueueRequest).queueUrl();
+            queueUrl = sqs.getQueueUrl(getQueueRequest).queueUrl();
         } catch (QueueNameExistsException e){
-            this.queueURL = getQueueURLByName(sqsName);
+            queueUrl = getQueueURLByName(sqsName);
         }
-        return this.queueURL;
+        return queueUrl;
     }
 
 }

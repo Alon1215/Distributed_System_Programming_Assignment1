@@ -27,7 +27,7 @@ public class LocalApp {
     // 1. Check if manager node is active (if not, initiate)
 
         //EC2 newEC2 = new EC2(); // create new manager if doesn't exist, else represents current one
-        ManagerHandler manager = new ManagerHandler(); // create new manager if doesn't exist, else represents current one
+        ManagerHandler manager = new ManagerHandler(n_input); // create new manager if doesn't exist, else represents current one
         // check which parameters are needed
 
 
@@ -65,18 +65,17 @@ public class LocalApp {
 //                String[] msg_s;
                 if (msg != null) {
 
-                    // TODO: ALON 24.11 23:00 : changed TaskProtocol.toString() to json
-//                    msg_s = msg.body().split("\n");
-//                    String type = msg_s[0];
                     TaskProtocol msg_parsed = gson.fromJson(msg.body(),TaskProtocol.class);
                     String type = msg_parsed.getType();
 
                     if (type.equals("done task")) {
+                        String outputKey = msg_parsed.getField2();
+                        String inputKey = bucket_key[1];
                         System.out.println("Summary file received");
-
-//                        s3.downloadSummaryFile(msg_s[1], msg_s[2], outputFileName); // TODO: ALON 24.11 23:00 : changed TaskProtocol.toString() to json
-                        s3.downloadSummaryFile(msg_parsed.getField1(), msg_parsed.getField2(), outputFileName);
-
+                        s3.downloadSummaryFile(bucketName, msg_parsed.getField2(), outputFileName);
+                        s3.emptyObjectFromBucket(bucketName, inputKey);
+                        s3.emptyObjectFromBucket(bucketName, outputKey);
+                        s3.deleteBucket(bucketName);
                         isDone = true;
                     } else {
                         System.out.println("ERROR Occurred, mission didn't accomplished");
@@ -86,7 +85,9 @@ public class LocalApp {
                 }
             }
         }
-            // 4.1 Downloads the summary file from S3, and create an html file representing the results.
+        sqsLocal.deleteQueue(sqsLocalURL);
+
+        // 4.1 Downloads the summary file from S3, and create an html file representing the results.
 
             // 4.2 Sends a termination message to the Manager if it was supplied as one of its input arguments.
 

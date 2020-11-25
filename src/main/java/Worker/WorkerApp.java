@@ -61,14 +61,10 @@ public class WorkerApp {
 
                     switch (type) {
                         case "new image task":
-//                            String textOutput = img2Txt(msg_s[1]);
-//                            sqs.sendMessage(managerUrl, new TaskProtocol("done ocr task",msg_s[1], textOutput,msg_s[3]).toString());
                             String textOutput = img2Txt(msg_parsed.getField1());
 
-                            // TODO: ALON 24.11 23:00
-//                            sqs.sendMessage(managerUrl, new TaskProtocol("done ocr task",msg_s[1], textOutput,msg_s[3]).toString());
                             sqs.sendMessage(managerUrl, gson.toJson(new TaskProtocol("done OCR task", msg_parsed.getField1(), textOutput, msg_parsed.getReplyURL())));
-//
+
                             break;
 
                         case "termination":

@@ -21,9 +21,9 @@ public class ManagerApp {
         String sqsManagerURL = sqsManager.getQueueURLByName("Local2Manager");
 
         // 2. Manager listen to his sqs queue
-
+        boolean isTerminated = false;
         Gson gson = new Gson();
-        while (true) {
+        while (!isTerminated) {
             List<Message> messages = sqsManager.getMessages(sqsManagerURL);
             for( Message msg : messages) {
 //                String[] msg_s;
@@ -43,8 +43,8 @@ public class ManagerApp {
                             workersHandler.handleNewTask(msg_parsed, replyUrl);
                             break;
                         case "termination":
-                            //TODO: DELETE LATER
-                            System.exit(1);
+                            workersHandler.handleTermination();
+                            isTerminated = true;
                             break;
                         default:
                             // not suppose to happen
@@ -52,6 +52,7 @@ public class ManagerApp {
                     }
                     sqsManager.deleteSingleMessage(sqsManagerURL, msg);
                 }
+                sqsManager.deleteQueue(sqsManagerURL);
                 // 2.1 If the message is that of a new task it:
 
                     // 2.1.1 The manager should create a worker for every n messages, if there are no running workers.

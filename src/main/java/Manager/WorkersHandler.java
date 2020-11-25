@@ -15,21 +15,22 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class WorkersHandler {
-    ConcurrentHashMap<String, Integer> amountOfMessagesPerLocal = new ConcurrentHashMap<String, Integer>();
-    ConcurrentHashMap<String, Vector<Pair<String, String>>> identifiedMessages = new ConcurrentHashMap<String, Vector<Pair<String, String>>>();
-
-    String amiId = "AMI here";
-    int amountOfActiveWorkers = 0;
-    String M2W_queURL;
-    String W2M_queURL;
+    private ConcurrentHashMap<String, Integer> amountOfMessagesPerLocal = new ConcurrentHashMap<String, Integer>();
+    private ConcurrentHashMap<String, Vector<Pair<String, String>>> identifiedMessages = new ConcurrentHashMap<String, Vector<Pair<String, String>>>();
+    private final Gson gson = new Gson();
+    private final String amiId = "AMI here";
+    private final AtomicInteger amountOfActiveWorkers = new AtomicInteger(0);
+    private final String M2W_queURL;
+    private final String W2M_queURL;
     private final Ec2Client ec2;
 
-    ArrayList<String> workersInstances;
-    S3Controller s3 = new S3Controller();
-    SQSController sqsController = new SQSController();
-    private int imagesPerWorker;
+    private final ArrayList<String> workersInstances;
+    private final S3Controller s3 = new S3Controller();
+    private final SQSController sqsController = new SQSController();
+    private final int imagesPerWorker;
 
     public WorkersHandler(int n){
         this.imagesPerWorker = n;
@@ -46,10 +47,6 @@ public class WorkersHandler {
         //TODO: Debug only:
         System.out.println("-> Workers2Manager: " + W2M_queURL);
 
-        // TODO: ALON 24.11 23:00 : changed TaskProtocol.toString() to json
-//        String[] urls = s3.getUrls(msg_s[1], msg_s[2]);
-//        String bucket = msg_s[1];
-//        String key = msg_s[2];
         String bucket = msg_parsed.getField1();
         String key = msg_parsed.getField2();
         String[] urls = s3.getUrls(bucket, key);
@@ -58,30 +55,26 @@ public class WorkersHandler {
 
         //TODO: Create new workers if needed
         double requiredWorkers = (double) urls.length/imagesPerWorker;
-        if(requiredWorkers > amountOfActiveWorkers){
+        if(requiredWorkers > amountOfActiveWorkers.get()){
 //            for(int i = 0; i < Math.ceil(requiredWorkers); i++){
 //                createWorker();
 //            }
             System.out.println("-> WorkerHandler: need to create new" + Math.round(requiredWorkers) + " workers");
             System.out.println("DEBUG: " + W2M_queURL + " " + M2W_queURL);
 
-            amountOfActiveWorkers = (int) Math.ceil(requiredWorkers);
+            amountOfActiveWorkers.set((int) Math.ceil(requiredWorkers));
         }
         amountOfMessagesPerLocal.put(replyUrl, 0);
         identifiedMessages.put(replyUrl, new Vector<Pair<String, String>>());
         amountOfMessagesPerLocal.replace(replyUrl, amountOfMessagesPerLocal.get(replyUrl) + urls.length);
 
-        Gson gson = new Gson();
+
         for(String imageUrl: urls){
 
-            // TODO: ALON 24.11 23:00 : changed TaskProtocol.toString() to json
-//            TaskProtocol task = new TaskProtocol("new image task", imageUrl, "", replyUrl);
-//            sqsController.sendMessage(M2W_queURL, task.toString());
-            //currentMessages.add()
             sqsController.sendMessage(M2W_queURL, gson.toJson(new TaskProtocol("new image task", imageUrl, "", replyUrl)));
 
         }
-        WorkersListener listener = new WorkersListener(W2M_queURL, amountOfMessagesPerLocal, identifiedMessages, bucket);
+        WorkersListener listener = new WorkersListener(amountOfActiveWorkers,W2M_queURL, amountOfMessagesPerLocal, identifiedMessages, bucket);
         //new Thread(WaitForOutput());
         System.out.println("W2M" + W2M_queURL + "\nM2W" + M2W_queURL);
         listener.run();
@@ -107,7 +100,7 @@ public class WorkersHandler {
 
         String instanceId = response.instances().get(0).instanceId();
         workersInstances.add(instanceId);
-        amountOfActiveWorkers++;
+        amountOfActiveWorkers.incrementAndGet();
         Tag tag = Tag.builder()
                 .key("Name")
                 .value("Worker" + System.currentTimeMillis())
@@ -128,6 +121,16 @@ public class WorkersHandler {
             System.exit(1);
         }
         System.out.println("Done!");
+
+    }
+
+    public void handleTermination() {
+        for(int i = 0; i < amountOfActiveWorkers.get(); i++){
+            sqsController.sendMessage(M2W_queURL, gson.toJson(new TaskProtocol("terminate worker", "", "", "")));
+        }
+        //TODO: join with the worker listener thread pool
+        sqsController.deleteQueue(M2W_queURL);
+        sqsController.deleteQueue(W2M_queURL);
 
     }
 }
