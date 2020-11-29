@@ -67,9 +67,10 @@ public class ManagerHandler {
     public void createInstance(int n_input){
 
         final String USAGE =
-                "To run this example, supply an instance name and AMI image id\n" +
-                        "Both values can be obtained from the AWS Console\n" +
-                        "Ex: CreateInstance <instance-name> <ami-image-id>\n";
+                "#!/bin/bash\n" +
+                "cd home/" +
+                "wget https://alontomdsp211.s3.amazonaws.com/ManagerApp.jar\n" +
+                "java -jar ManagerApp.jar " + n_input + " \n";
 
 
         RunInstancesRequest runRequest = RunInstancesRequest.builder()

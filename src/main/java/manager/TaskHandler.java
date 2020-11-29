@@ -80,9 +80,10 @@ public class TaskHandler {
 
     public void createWorker() {
         final String USAGE =
-                "Worker to manager QUE \n" + W2M_queURL +
-                        "Both values can be obtained from the AWS Console\n" +
-                        "Ex: CreateInstance <instance-name> <ami-image-id>\n";
+                "#!/bin/bash\n" +
+                "cd home/" +
+                "wget https://alontomdsp211.s3.amazonaws.com/WorkerApp.jar\n" +
+                "java -jar WorkerApp.jar" + W2M_queURL + " " + M2W_queURL + "\n";
 
         RunInstancesRequest runRequest = RunInstancesRequest.builder()
                 .instanceType(InstanceType.T2_MICRO)
