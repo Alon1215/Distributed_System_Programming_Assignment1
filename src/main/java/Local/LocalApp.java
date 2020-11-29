@@ -40,58 +40,56 @@ public class LocalApp {
 
     // 3. Sends a message to an SQS queue, stating the location of the file on S3
 
-        // 3.1 create SQS for local2manager & manager2local
+    // 3.1 create SQS for local2manager & manager2local
         SQSController sqsLocal = new SQSController();
         String sqsLocalURL = sqsLocal.createQueue("local" + new Date().getTime());
         System.out.println("-> sqsLocal created");
-        // 3.2 Sends a message to an SQS queue
 
-        // TODO: ALON 24.11 23:00 : changed TaskProtocol.toString() to json
-//        sqsLocal.sendMessage(manager.getQueueURL(), new TaskProtocol("new task",bucket_key[0], bucket_key[1], sqsLocalURL).toString());
+    // 3.2 Sends a message to an SQS queue
         Gson gson = new Gson();
         sqsLocal.sendMessage(manager.getQueueURL(), gson.toJson(new TaskProtocol("new task",bucket_key[0], bucket_key[1], sqsLocalURL)));
 
-
-
-        // 4. Checks an SQS queue for a message indicating the process is done and the response (the summary file) is available on S3.
+    // 4. Checks an SQS queue for a message indicating the process is done and the response (the summary file) is available on S3.
         sqsLocal.getMessages(sqsLocalURL);
 
         boolean isDone = false;
         while(!isDone){
             List<Message> messages = sqsLocal.getMessages(sqsLocalURL);
             for( Message msg : messages) {
-//                String[] msg_s;
                 if (msg != null) {
 
                     TaskProtocol msg_parsed = gson.fromJson(msg.body(),TaskProtocol.class);
                     String type = msg_parsed.getType();
 
+    // 4.1 Downloads the summary file from S3, and create an html file representing the results.
                     if (type.equals("done task")) {
-                        String outputKey = msg_parsed.getField2();
-                        String inputKey = bucket_key[1];
-                        System.out.println("Summary file received");
-                        s3.downloadSummaryFile(bucketName, msg_parsed.getField2(), outputFileName);
-                        s3.emptyObjectFromBucket(bucketName, inputKey);
-                        s3.emptyObjectFromBucket(bucketName, outputKey);
-                        s3.deleteBucket(bucketName);
+
+                        // Download summary file, clean & delete bucket
+                        processTaskOutput(outputFileName, s3, bucketName, bucket_key[1], msg_parsed);
+
+    // 4.2 Sends a termination message to the Manager if it was supplied as one of its input arguments.
                         if (isTerminating){
                             sqsLocal.sendMessage(manager.getQueueURL(), gson.toJson(new TaskProtocol("terminate","", "", "")));
                         }
                         isDone = true;
+
                     } else {
-                        System.out.println("ERROR Occurred, mission didn't accomplished");
+                        System.err.println("ERROR Occurred, mission didn't accomplished");
                     }
                     sqsLocal.deleteSingleMessage(sqsLocalURL, msg);
-
                 }
             }
         }
         sqsLocal.deleteQueue(sqsLocalURL);
 
-        // 4.1 Downloads the summary file from S3, and create an html file representing the results.
+    }
 
-            // 4.2 Sends a termination message to the Manager if it was supplied as one of its input arguments.
-
-
+    private static void processTaskOutput(String outputFileName, S3Controller s3, String bucketName, String inputKey1, TaskProtocol msg_parsed) {
+        String outputKey = msg_parsed.getField2();
+        System.out.println("Summary file received");
+        s3.downloadSummaryFile(bucketName, msg_parsed.getField2(), outputFileName);
+        s3.emptyObjectFromBucket(bucketName, inputKey1);
+        s3.emptyObjectFromBucket(bucketName, outputKey);
+        s3.deleteBucket(bucketName);
     }
 }

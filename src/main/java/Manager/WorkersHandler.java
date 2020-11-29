@@ -8,7 +8,6 @@ import javafx.util.Pair;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.ec2.Ec2Client;
 import software.amazon.awssdk.services.ec2.model.*;
-import software.amazon.awssdk.services.sqs.model.Message;
 
 import java.util.ArrayList;
 import java.util.Base64;
@@ -77,15 +76,13 @@ public class WorkersHandler {
         WorkersListener listener = new WorkersListener(amountOfActiveWorkers,W2M_queURL, amountOfMessagesPerLocal, identifiedMessages, bucket);
         workersListenerPool.execute(listener);
     }
+
+
     public void createWorker() {
         final String USAGE =
                 "Worker to manager QUE \n" + W2M_queURL +
                         "Both values can be obtained from the AWS Console\n" +
                         "Ex: CreateInstance <instance-name> <ami-image-id>\n";
-
-
-        // snippet-start:[ec2.java2.create_instance.main]
-        //  client = Ec2Client.create();
 
         RunInstancesRequest runRequest = RunInstancesRequest.builder()
                 .instanceType(InstanceType.T2_MICRO)
@@ -123,22 +120,59 @@ public class WorkersHandler {
     }
 
     public void handleTermination() {
+
+        //send termination to all workers
         for(int i = 0; i < amountOfActiveWorkers.get(); i++){
             sqsController.sendMessage(M2W_queURL, gson.toJson(new TaskProtocol("terminate worker", "", "", "")));
         }
+
+        // wait to all workers to finish their program
         workersListenerPool.shutdown();
         try {
             workersListenerPool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
         } catch (InterruptedException e) {
             System.err.println(e.toString());
         }
+
+        // delete communication (sqs) between manager and workers
         sqsController.deleteQueue(M2W_queURL);
         sqsController.deleteQueue(W2M_queURL);
 
+        // terminate Workers' EC2
+        for ( String instanceId : workersInstances){
+            terminateEC2ById(instanceId);
+        }
+
+        // Terminate Manager's EC2 and finish
+
+
     }
-    private void terminateEC2Worker(String instanceId){
-        TerminateInstancesRequest request = TerminateInstancesRequest.builder()
-                .instanceIds(instanceId).build();
-        TerminateInstancesResponse respone = ec2.terminateInstances(request);
+
+    private void terminateEC2ById(String instanceId) {
+        try {
+
+
+            TerminateInstancesRequest request = TerminateInstancesRequest.builder()
+                    .instanceIds(instanceId).build();
+            TerminateInstancesResponse response = ec2.terminateInstances(request);
+            System.out.println("MANAGER: Terminated Worker: " + instanceId);
+
+        } catch (Exception e){
+            System.err.println("Failed to Terminate Worker: " + instanceId);
+        }
     }
+
+//    public boolean terminateWorkerById(String instanecID){
+//
+//    TerminateInstancesRequest terminateInstancesRequest = new TerminateInstancesRequest()
+//            .withInstanceIds(instanecID);
+//
+//    ec2.terminateInstances(terminateInstancesRequest)
+//            .getTerminatingInstances()
+//            .get(0)
+//            .getPreviousState()
+//            .getName();
+//
+//    }
+
 }
