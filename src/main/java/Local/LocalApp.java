@@ -26,7 +26,7 @@ public class LocalApp {
         boolean isTerminating = (args.length == 4 && args[3].equals("terminate"));
     // 1. Check if manager node is active (if not, initiate)
 
-        //EC2 newEC2 = new EC2(); // create new manager if doesn't exist, else represents current one
+        EC2 newEC2 = new EC2(); // create new manager if doesn't exist, else represents current one
         ManagerHandler manager = new ManagerHandler(n_input); // create new manager if doesn't exist, else represents current one
         // check which parameters are needed
 

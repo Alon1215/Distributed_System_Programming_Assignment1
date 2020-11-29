@@ -29,9 +29,7 @@ public class EC2 {
     }
 
     private boolean checkIfManagerExist() {
-
         List<Reservation> reservList = ec2.describeInstances().reservations();
-
         //iterate on reservList and call
         for (Reservation reservation : reservList) {
             List<Instance> instanceList = reservation.instances();
