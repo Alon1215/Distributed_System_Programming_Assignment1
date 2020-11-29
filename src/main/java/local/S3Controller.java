@@ -1,4 +1,4 @@
-package Local;
+package local;
 // snippet-start:[s3.java2.s3_object_operations.complete]
 // snippet-start:[s3.java2.s3_object_operations.import]
 

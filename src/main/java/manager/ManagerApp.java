@@ -1,14 +1,9 @@
-package Manager;
-import Local.*;
+package manager;
+import local.*;
 import com.google.gson.Gson;
-import javafx.util.Pair;
 import software.amazon.awssdk.services.sqs.model.Message;
 
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Vector;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class ManagerApp {
 
@@ -16,10 +11,10 @@ public class ManagerApp {
 //      int n = args[0]; // TODO:
         int n = 10; // temp
     // 1. Retrieve sqs url (and create sqs client
-        WorkersHandler workersHandler = new WorkersHandler(n);
-        //S3Controller s3 = new S3Controller();
+        TaskHandler taskHandler = new TaskHandler(n);
         SQSController sqsManager = new SQSController();
         String sqsManagerURL = sqsManager.getQueueURLByName("Local2Manager");
+        String managerInstanceId = "";
 
         // 2. Manager listen to his sqs queue
         boolean isTerminated = false;
@@ -35,10 +30,11 @@ public class ManagerApp {
 
                     switch (type) {
                         case "new task":
-                            workersHandler.handleNewTask(msg_parsed, replyUrl);
+                            taskHandler.handleNewTask(msg_parsed, replyUrl);
                             break;
                         case "terminate":
-                            workersHandler.handleTermination();
+                            managerInstanceId = msg_parsed.getField1();
+                            taskHandler.handleTermination();
                             isTerminated = true;
                             break;
                         default:
@@ -67,6 +63,9 @@ public class ManagerApp {
         }
         sqsManager.deleteQueue(sqsManagerURL);
 
+
+        // Terminate Manager's EC2 and finish
+        taskHandler.terminateEC2ById(managerInstanceId);
     }
 
 }

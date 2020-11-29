@@ -1,22 +1,16 @@
-package Local;
+package local;
 
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.ec2.Ec2Client;
 import software.amazon.awssdk.services.ec2.model.*;
-import software.amazon.awssdk.services.sqs.SqsClient;
-import software.amazon.awssdk.services.sqs.model.CreateQueueRequest;
-import software.amazon.awssdk.services.sqs.model.CreateQueueResponse;
-import software.amazon.awssdk.services.sqs.model.GetQueueUrlRequest;
-import software.amazon.awssdk.services.sqs.model.QueueNameExistsException;
 
 import java.util.Base64;
-import java.util.Date;
 import java.util.List;
 
 public class ManagerHandler {
     private SQSController sqs = new SQSController();
     private final Ec2Client ec2;
-    private final String name = "Manager";
+    private final String name = "manager";
     private final String amiId = "ami-076515f20540e6e0b";
     private String instanceId;
     private String sqsURL;
@@ -117,6 +111,10 @@ public class ManagerHandler {
 
     public String getQueueURL() {
         return sqsURL;
+    }
+
+    public String getInstanceId() {
+        return instanceId;
     }
 }
 

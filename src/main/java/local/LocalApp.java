@@ -1,4 +1,4 @@
-package Local;
+package local;
 
 import com.google.gson.Gson;
 import software.amazon.awssdk.services.sqs.model.Message;
@@ -69,7 +69,7 @@ public class LocalApp {
 
     // 4.2 Sends a termination message to the Manager if it was supplied as one of its input arguments.
                         if (isTerminating){
-                            sqsLocal.sendMessage(manager.getQueueURL(), gson.toJson(new TaskProtocol("terminate","", "", "")));
+                            sqsLocal.sendMessage(manager.getQueueURL(), gson.toJson(new TaskProtocol("terminate",manager.getInstanceId(), "", "")));
                         }
                         isDone = true;
 

@@ -1,8 +1,8 @@
-package Manager;
+package manager;
 
-import Local.S3Controller;
-import Local.SQSController;
-import Local.TaskProtocol;
+import local.S3Controller;
+import local.SQSController;
+import local.TaskProtocol;
 import com.google.gson.Gson;
 import javafx.util.Pair;
 import software.amazon.awssdk.services.sqs.model.Message;

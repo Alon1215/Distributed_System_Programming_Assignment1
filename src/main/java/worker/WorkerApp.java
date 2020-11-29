@@ -1,5 +1,5 @@
-package Worker;
-import Local.*;
+package worker;
+import local.*;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -15,8 +15,6 @@ import net.sourceforge.tess4j.TesseractException;
 import software.amazon.awssdk.services.sqs.model.Message;
 
 import java.net.URL;
-import java.sql.SQLException;
-import java.sql.Time;
 import java.util.*;
 import java.util.List;
 
@@ -24,7 +22,7 @@ import java.util.List;
 public class WorkerApp {
 
     public static void main(String[] args) {
-        final String uniqueName = "Worker" + System.currentTimeMillis();
+        final String uniqueName = "worker" + System.currentTimeMillis();
         System.out.println(uniqueName + ": Start->");  // TODO: delete, test only
 
         if (args.length < 2){ // TODO: args check, decide how many args required

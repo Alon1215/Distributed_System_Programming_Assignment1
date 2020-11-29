@@ -1,4 +1,4 @@
-package Local;
+package local;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.ec2.Ec2Client;
 import software.amazon.awssdk.services.ec2.model.*;
@@ -8,7 +8,7 @@ import java.util.List;
 
 public class EC2 {
     Ec2Client ec2 = null;
-    String name = "Manager";
+    String name = "manager";
     String amiId = "ami-03fb8155c2b349f7a";
     String instanceId;
 

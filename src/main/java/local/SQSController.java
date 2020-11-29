@@ -1,4 +1,4 @@
-package Local;
+package local;
 import software.amazon.awssdk.services.sqs.model.*;
 import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.CreateQueueRequest;
@@ -8,14 +8,10 @@ import software.amazon.awssdk.services.sqs.model.GetQueueUrlRequest;
 import software.amazon.awssdk.services.sqs.model.Message;
 import software.amazon.awssdk.services.sqs.model.QueueNameExistsException;
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest;
-import software.amazon.awssdk.services.sqs.model.SendMessageBatchRequest;
-import software.amazon.awssdk.services.sqs.model.SendMessageBatchRequestEntry;
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
-import java.util.Date;
+
 import java.util.List;
 import software.amazon.awssdk.regions.Region;
-
-import java.awt.*;
 
 public class SQSController {
     public SqsClient sqs;

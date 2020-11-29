@@ -1,8 +1,8 @@
-package Manager;
+package manager;
 
-import Local.S3Controller;
-import Local.SQSController;
-import Local.TaskProtocol;
+import local.S3Controller;
+import local.SQSController;
+import local.TaskProtocol;
 import com.google.gson.Gson;
 import javafx.util.Pair;
 import software.amazon.awssdk.regions.Region;
@@ -16,7 +16,7 @@ import java.util.Vector;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class WorkersHandler {
+public class TaskHandler {
     private ConcurrentHashMap<String, Integer> amountOfMessagesPerLocal = new ConcurrentHashMap<String, Integer>();
     private ConcurrentHashMap<String, Vector<Pair<String, String>>> identifiedMessages = new ConcurrentHashMap<String, Vector<Pair<String, String>>>();
     private final Gson gson = new Gson();
@@ -31,7 +31,7 @@ public class WorkersHandler {
     private final SQSController sqsController = new SQSController();
     private final int imagesPerWorker;
 
-    public WorkersHandler(int n){
+    public TaskHandler(int n){
         this.imagesPerWorker = n;
         ec2 = Ec2Client.builder()
                 .region(Region.US_EAST_1)
@@ -98,7 +98,7 @@ public class WorkersHandler {
         amountOfActiveWorkers.incrementAndGet();
         Tag tag = Tag.builder()
                 .key("Name")
-                .value("Worker" + System.currentTimeMillis())
+                .value("worker" + System.currentTimeMillis())
                 .build();
 
         CreateTagsRequest tagRequest = CreateTagsRequest.builder()
@@ -143,12 +143,9 @@ public class WorkersHandler {
             terminateEC2ById(instanceId);
         }
 
-        // Terminate Manager's EC2 and finish
-
-
     }
 
-    private void terminateEC2ById(String instanceId) {
+    public void terminateEC2ById(String instanceId) {
         try {
 
 
