@@ -136,4 +136,9 @@ public class WorkersHandler {
         sqsController.deleteQueue(W2M_queURL);
 
     }
+    private void terminateEC2Worker(String instanceId){
+        TerminateInstancesRequest request = TerminateInstancesRequest.builder()
+                .instanceIds(instanceId).build();
+        TerminateInstancesResponse respone = ec2.terminateInstances(request);
+    }
 }
