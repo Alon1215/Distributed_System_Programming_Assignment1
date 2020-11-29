@@ -25,18 +25,14 @@ public class WorkerApp {
         final String uniqueName = "worker" + System.currentTimeMillis();
         System.out.println(uniqueName + ": Start->");  // TODO: delete, test only
 
-        if (args.length < 2){ // TODO: args check, decide how many args required
-            System.out.println(uniqueName + ": Not enough arguments, Worker shut down ungracefully");
+        if (args.length < 2){
+            System.err.println(uniqueName + ": Not enough arguments, Worker shut down ungracefully");
             System.exit(1);
         }
 
         String ManagerQueueUrl = args[0]; //worker2manager queue
         String workersQueueUrl = args[1]; //manager2workers queue
         workerLoop(ManagerQueueUrl, workersQueueUrl);
-        //terminateWorker(ManagerQueueUrl);    // TODO: how to terminate worker (done outside of loop)
-
-
-//        convertDemo("Demo"); // TODO: delete. test only
 
     }
 
@@ -77,67 +73,21 @@ public class WorkerApp {
         }
     }
 
-    public static void convertDemo(String path) {
-        try {
-            //File inputFile = new File(path);
-            File inputFile = new File("text.images.txt");
-            Scanner myReader = new Scanner(inputFile);
-
-
-            while (myReader.hasNextLine()) {
-                String data = myReader.nextLine();
-                System.out.println(data);
-                img2TxtDemo(data);
-
-            }
-            myReader.close();
-        } catch (FileNotFoundException e) {
-            System.out.println("input file: No file found, program terminates.");
-            e.printStackTrace();
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
-    }
-
-
     public static BufferedImage toBufferedImage(Image img) {
         if (img instanceof BufferedImage) {
             return (BufferedImage) img;
         }
-    // Create a buffered image with transparency
-    BufferedImage bimage = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+        // Create a buffered image with transparency
+        BufferedImage bimage = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
 
-    // Draw the image on to the buffered image
-    Graphics2D bGr = bimage.createGraphics();
-        bGr.drawImage(img, 0, 0, null);
-        bGr.dispose();
+        // Draw the image on to the buffered image
+        Graphics2D bGr = bimage.createGraphics();
+            bGr.drawImage(img, 0, 0, null);
+            bGr.dispose();
 
-    // Return the buffered image
+        // Return the buffered image
         return bimage;
 }
-    public static void img2TxtDemo(String url) throws MalformedURLException {
-
-        Tesseract tesseract = new Tesseract();
-        tesseract.setDatapath("tessdata-master");
-        URL url_IMG = new URL(url);
-        Image image = null;
-        try {
-             image = ImageIO.read(url_IMG);
-        } catch (IOException e) {
-            System.out.println("Image not found");
-        }
-        String s = null;
-        try {
-            if(image == null)
-                return;
-            s = tesseract.doOCR(toBufferedImage(image));
-        } catch (TesseractException e) {
-            System.out.println("Test");
-        }
-        System.out.println("Result: " + s);
-
-
-    }
 
     public static String img2Txt(String url) {
 

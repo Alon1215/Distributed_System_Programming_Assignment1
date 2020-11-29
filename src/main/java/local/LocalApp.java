@@ -10,23 +10,25 @@ import java.util.List;
 public class LocalApp {
 
     public static void main(String[] args) {
-        /*
+
         if (args.length < 3){
             System.out.println("To few arguments, program terminate");
             System.exit(1);
         }
-        Region region;
         String inputFileName = args[0];
-        String outputFile = args[1];
-        int n = Integer.parseInt(args[2]);
-        */
+        String outputFileName = args[1];
+        int n_input = Integer.parseInt(args[2]);
+        boolean isTerminating = (args.length == 4 && args[3].equals("terminate"));
+
+        /*
         String inputFileName = "input1task.txt";
         String outputFileName = "output" + System.currentTimeMillis();
-        int n_input = 10; // TODO: implement n as input throughout application
-        boolean isTerminating = (args.length == 4 && args[3].equals("terminate"));
+        int n_input = 10; // TODO: delete later
+        */
+
+
     // 1. Check if manager node is active (if not, initiate)
 
-        EC2 newEC2 = new EC2(); // create new manager if doesn't exist, else represents current one
         ManagerHandler manager = new ManagerHandler(n_input); // create new manager if doesn't exist, else represents current one
         // check which parameters are needed
 

@@ -20,21 +20,6 @@ import software.amazon.awssdk.core.sync.ResponseTransformer;
 public class S3Controller {
 
     private static final S3Client s3 = S3Client.builder().region(Region.US_EAST_1).build();
-//    private String bucketName; // @TODO: Alon 12:00 : added field
-//    private String keyName; // @TODO: Alon 12:00 : added field
-
-//    private static void createBucket(String bucket, Region region) {
-//        s3.createBucket(CreateBucketRequest
-//                .builder()
-//                .bucket(bucket)
-//                .createBucketConfiguration(
-//                        CreateBucketConfiguration.builder()
-//                                .locationConstraint(region.id())
-//                                .build())
-//                .build());
-//
-//        System.out.println(bucket);
-//    }
 
     public void deleteBucket(String bucket) {
         DeleteBucketRequest deleteBucketRequest = DeleteBucketRequest.builder().bucket(bucket).build();
@@ -44,12 +29,6 @@ public class S3Controller {
     public void emptyObjectFromBucket(String bucket, String key){
         DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder().bucket(bucket).key(key).build();
         s3.deleteObject(deleteObjectRequest);
-    }
-
-    private static ByteBuffer getRandomByteBuffer(int size) throws IOException {
-        byte[] b = new byte[size];
-        new Random().nextBytes(b);
-        return ByteBuffer.wrap(b);
     }
 
 
@@ -123,7 +102,6 @@ public class S3Controller {
             sb.append(sc.nextLine());
             sb.append("\n");
         }
-     //   System.out.println(sb.toString());
 
         return sb.toString().split("\n");
     }

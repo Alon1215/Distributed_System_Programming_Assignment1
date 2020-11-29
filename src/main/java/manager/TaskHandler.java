@@ -51,13 +51,11 @@ public class TaskHandler {
         String[] urls = s3.getUrls(bucket, key);
 
 
-
-        //TODO: Create new workers if needed
         double requiredWorkers = (double) urls.length/imagesPerWorker;
         if(requiredWorkers > amountOfActiveWorkers.get()){
-//            for(int i = 0; i < Math.ceil(requiredWorkers); i++){
-//                createWorker();
-//            }
+            for(int i = 0; i < Math.ceil(requiredWorkers); i++){
+                createWorker();
+            }
             System.out.println("-> WorkerHandler: need to create new" + Math.round(requiredWorkers) + " workers");
             System.out.println("DEBUG: " + W2M_queURL + " " + M2W_queURL);
 
@@ -159,18 +157,5 @@ public class TaskHandler {
             System.err.println("Failed to Terminate Worker: " + instanceId);
         }
     }
-
-//    public boolean terminateWorkerById(String instanecID){
-//
-//    TerminateInstancesRequest terminateInstancesRequest = new TerminateInstancesRequest()
-//            .withInstanceIds(instanecID);
-//
-//    ec2.terminateInstances(terminateInstancesRequest)
-//            .getTerminatingInstances()
-//            .get(0)
-//            .getPreviousState()
-//            .getName();
-//
-//    }
 
 }
