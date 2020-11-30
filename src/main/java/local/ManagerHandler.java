@@ -11,7 +11,7 @@ public class ManagerHandler {
     private SQSController sqs = new SQSController();
     private final Ec2Client ec2;
     private final String name = "manager";
-    private final String amiId = "ami-076515f20540e6e0b";
+    private final String amiId = "ami-03ed0fa57f46fb3d6";
     private String instanceId;
     private String sqsURL;
 
@@ -22,19 +22,19 @@ public class ManagerHandler {
                 .build();
 
         // create new instance (if needed) & set sqs url
-//        if (!checkIfManagerExist()) {
-//            createInstance(n_input);
+        if (!checkIfManagerExist()) {
+            createInstance(n_input);
             System.out.println("Finished making a Manager");
 
             this.sqsURL = this.sqs.createQueue("Local2Manager");
             System.out.println("ManagerHandler: Manager queue created URL: " + sqsURL);
-//        }
-//        else{
-//            System.out.println("Manager already exist");
-//
-//            // TODO: ALON 14.11:
-//            this.sqsURL = sqs.getQueueURLByName("Local2Manager");
-//        }
+        }
+        else{
+            System.out.println("Manager already exist");
+
+            // TODO: ALON 14.11:
+            this.sqsURL = sqs.getQueueURLByName("Local2Manager");
+        }
     }
 
     private boolean checkIfManagerExist() {
@@ -68,13 +68,13 @@ public class ManagerHandler {
 
         final String USAGE =
                 "#!/bin/bash\n" +
-                "cd home/" +
+                "cd /home/ec2-user\n" +
                 "wget https://alontomdsp211.s3.amazonaws.com/ManagerApp.jar\n" +
-                "java -jar ManagerApp.jar " + n_input + " \n";
-
-
+                "java -jar ManagerApp.jar " + n_input + "\n";
+        IamInstanceProfileSpecification role = IamInstanceProfileSpecification.builder().arn("arn:aws:iam::119201439262:instance-profile/ManagerDSP211AT").build();
         RunInstancesRequest runRequest = RunInstancesRequest.builder()
-                .instanceType(InstanceType.T2_MICRO)
+                .instanceType(InstanceType.T2_SMALL)
+                .iamInstanceProfile(role)
                 .imageId(amiId)
                 .maxCount(1)
                 .minCount(1)

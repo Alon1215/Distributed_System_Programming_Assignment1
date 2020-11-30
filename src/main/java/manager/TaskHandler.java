@@ -20,7 +20,7 @@ public class TaskHandler {
     private ConcurrentHashMap<String, Integer> amountOfMessagesPerLocal = new ConcurrentHashMap<String, Integer>();
     private ConcurrentHashMap<String, Vector<Pair<String, String>>> identifiedMessages = new ConcurrentHashMap<String, Vector<Pair<String, String>>>();
     private final Gson gson = new Gson();
-    private final String amiId = "AMI here";
+    private final String amiId = "ami-03ed0fa57f46fb3d6";
     private final AtomicInteger amountOfActiveWorkers = new AtomicInteger(0);
     private final String M2W_queURL;
     private final String W2M_queURL;
@@ -79,12 +79,14 @@ public class TaskHandler {
     public void createWorker() {
         final String USAGE =
                 "#!/bin/bash\n" +
-                "cd home/" +
+                "cd /home/ec2-user\n" +
                 "wget https://alontomdsp211.s3.amazonaws.com/WorkerApp.jar\n" +
-                "java -jar WorkerApp.jar" + W2M_queURL + " " + M2W_queURL + "\n";
+                "java -jar WorkerApp.jar " + W2M_queURL + " " + M2W_queURL + "\n";
+        IamInstanceProfileSpecification role = IamInstanceProfileSpecification.builder().arn("arn:aws:iam::119201439262:instance-profile/WorkerDPS211AT").build();
 
         RunInstancesRequest runRequest = RunInstancesRequest.builder()
                 .instanceType(InstanceType.T2_MICRO)
+                .iamInstanceProfile(role)
                 .imageId(amiId)
                 .maxCount(1)
                 .minCount(1)
