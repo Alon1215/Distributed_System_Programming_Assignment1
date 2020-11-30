@@ -11,7 +11,7 @@ public class ManagerHandler {
     private SQSController sqs = new SQSController();
     private final Ec2Client ec2;
     private final String name = "manager";
-    private final String amiId = "ami-03ed0fa57f46fb3d6";
+    private final String amiId = "ami-0b8ae442d9a63a4f8";
     private String instanceId;
     private String sqsURL;
 
@@ -68,7 +68,6 @@ public class ManagerHandler {
 
         final String USAGE =
                 "#!/bin/bash\n" +
-                "cd /home/ec2-user\n" +
                 "wget https://alontomdsp211.s3.amazonaws.com/ManagerApp.jar\n" +
                 "java -jar ManagerApp.jar " + n_input + "\n";
         IamInstanceProfileSpecification role = IamInstanceProfileSpecification.builder().arn("arn:aws:iam::119201439262:instance-profile/ManagerDSP211AT").build();

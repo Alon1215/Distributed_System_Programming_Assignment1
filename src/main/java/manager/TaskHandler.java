@@ -4,28 +4,24 @@ import local.S3Controller;
 import local.SQSController;
 import local.TaskProtocol;
 import com.google.gson.Gson;
-import javafx.util.Pair;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.ec2.Ec2Client;
 import software.amazon.awssdk.services.ec2.model.*;
 
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Date;
-import java.util.Vector;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class TaskHandler {
     private ConcurrentHashMap<String, Integer> amountOfMessagesPerLocal = new ConcurrentHashMap<String, Integer>();
-    private ConcurrentHashMap<String, Vector<Pair<String, String>>> identifiedMessages = new ConcurrentHashMap<String, Vector<Pair<String, String>>>();
+    private ConcurrentHashMap<String, HashMap<String, String>> identifiedMessages = new ConcurrentHashMap<String, HashMap<String, String>>();
     private final Gson gson = new Gson();
-    private final String amiId = "ami-03ed0fa57f46fb3d6";
+    private final String amiId = "ami-0b8ae442d9a63a4f8";
     private final AtomicInteger amountOfActiveWorkers = new AtomicInteger(0);
     private final String M2W_queURL;
     private final String W2M_queURL;
     private final Ec2Client ec2;
-    ExecutorService workersListenerPool = Executors.newFixedThreadPool(2);
+    ExecutorService workersListenerPool = Executors.newFixedThreadPool(1);
     private final ArrayList<String> workersInstances;
     private final S3Controller s3 = new S3Controller();
     private final SQSController sqsController = new SQSController();
@@ -62,7 +58,7 @@ public class TaskHandler {
             amountOfActiveWorkers.set((int) Math.ceil(requiredWorkers));
         }
         amountOfMessagesPerLocal.put(replyUrl, 0);
-        identifiedMessages.put(replyUrl, new Vector<Pair<String, String>>());
+        identifiedMessages.put(replyUrl, new HashMap<String, String>());
         amountOfMessagesPerLocal.replace(replyUrl, amountOfMessagesPerLocal.get(replyUrl) + urls.length);
 
 
@@ -72,14 +68,14 @@ public class TaskHandler {
 
         }
         WorkersListener listener = new WorkersListener(amountOfActiveWorkers,W2M_queURL, amountOfMessagesPerLocal, identifiedMessages, bucket);
-        workersListenerPool.execute(listener);
+        listener.run();
+        //   workersListenerPool.execute(listener);
     }
 
 
     public void createWorker() {
         final String USAGE =
                 "#!/bin/bash\n" +
-                "cd /home/ec2-user\n" +
                 "wget https://alontomdsp211.s3.amazonaws.com/WorkerApp.jar\n" +
                 "java -jar WorkerApp.jar " + W2M_queURL + " " + M2W_queURL + "\n";
         IamInstanceProfileSpecification role = IamInstanceProfileSpecification.builder().arn("arn:aws:iam::119201439262:instance-profile/ManagerDSP211AT").build();
