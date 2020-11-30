@@ -51,8 +51,7 @@ public class WorkersListener implements Runnable {
                             identifiedMessages.get(replyUrl).add(img_identified_text);
                             amountOfMessagesPerLocal.replace(replyUrl, amountOfMessagesPerLocal.get(replyUrl) - 1);
                             if (amountOfMessagesPerLocal.get(replyUrl) <= 0) {
-                                // TODO: make a html file and upload it to s3
-                                
+
                                 doneTask(replyUrl, bucket);
                                 amountOfMessagesPerLocal.remove(replyUrl);
                             }

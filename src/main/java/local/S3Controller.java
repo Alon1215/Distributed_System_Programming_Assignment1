@@ -65,8 +65,8 @@ public class S3Controller {
             bytes = Files.readAllBytes(Paths.get(path));
         } catch (IOException e) {
             //e.printStackTrace();
-            System.out.println("putInputInBucket: ERROR Input file not found");
-            return new String[]{"ERROR"};
+            System.err.println("putInputInBucket: ERROR Input file: "+ name +" not found");
+            return null;
         }
         ByteBuffer buffer = ByteBuffer.wrap(bytes);
 

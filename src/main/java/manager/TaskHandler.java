@@ -82,7 +82,7 @@ public class TaskHandler {
                 "cd /home/ec2-user\n" +
                 "wget https://alontomdsp211.s3.amazonaws.com/WorkerApp.jar\n" +
                 "java -jar WorkerApp.jar " + W2M_queURL + " " + M2W_queURL + "\n";
-        IamInstanceProfileSpecification role = IamInstanceProfileSpecification.builder().arn("arn:aws:iam::119201439262:instance-profile/WorkerDPS211AT").build();
+        IamInstanceProfileSpecification role = IamInstanceProfileSpecification.builder().arn("arn:aws:iam::119201439262:instance-profile/ManagerDSP211AT").build();
 
         RunInstancesRequest runRequest = RunInstancesRequest.builder()
                 .instanceType(InstanceType.T2_MICRO)

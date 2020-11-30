@@ -5,13 +5,13 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;  // Import the File class
-import java.io.FileNotFoundException;  // Import this class to handle errors
 import java.io.IOException;
 import java.net.MalformedURLException;
 
 import com.google.gson.Gson;
 import net.sourceforge.tess4j.Tesseract;
 import net.sourceforge.tess4j.TesseractException;
+import net.sourceforge.tess4j.util.LoadLibs;
 import software.amazon.awssdk.services.sqs.model.Message;
 
 import java.net.URL;
@@ -92,7 +92,10 @@ public class WorkerApp {
     public static String img2Txt(String url) {
 
         Tesseract tesseract = new Tesseract();
-        tesseract.setDatapath("tessdata-master");
+        tesseract.setLanguage("eng");
+        tesseract.setOcrEngineMode(1);
+        File tessdata = LoadLibs.extractTessResources("tessdata-master");
+        tesseract.setDatapath(tessdata.getAbsolutePath());
 
         try {
             URL url_IMG = new URL(url);

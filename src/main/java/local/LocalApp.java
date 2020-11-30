@@ -38,6 +38,11 @@ public class LocalApp {
         S3Controller s3 = new S3Controller();
         String bucketName = s3.createNewBucket();
         String[] bucket_key = s3.putInputInBucket(inputFileName,bucketName, "inputFileName");
+        if (bucket_key == null){
+            // upload failed, exit ungracefully
+            System.err.println("upload failed, exit ungracefully");
+            System.exit(-1);
+        }
         System.out.println(Arrays.toString(bucket_key)); // TODO: delete, test only
 
     // 3. Sends a message to an SQS queue, stating the location of the file on S3

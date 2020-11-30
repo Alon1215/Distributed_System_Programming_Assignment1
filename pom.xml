@@ -7,17 +7,10 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <groupId>org.example</groupId>
-    <artifactId>WorkerApp</artifactId>
+    <artifactId>LocalApp</artifactId>
     <version>1.0</version>
     <build>
-        <resources>
-            <resource>
-                <directory>.</directory>
-                <includes>
-                    <include>tessdata-master/**/*.*</include>
-                </includes>
-            </resource>
-        </resources>
+
 
         <plugins>
             <plugin>
@@ -44,7 +37,7 @@
                             <archive>
                                 <manifest>
                                     <mainClass>
-                                        worker.WorkerApp
+                                        local.LocalApp
                                     </mainClass>
                                 </manifest>
                             </archive>
