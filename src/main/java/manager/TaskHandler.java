@@ -46,11 +46,10 @@ public class TaskHandler {
 
         double requiredWorkers = (double) urls.length/imagesPerWorker;
         if(requiredWorkers > amountOfActiveWorkers.get()){
-            for(int i = 0; i < Math.ceil(requiredWorkers); i++){
+            int additionalWorkers = (int)Math.ceil(requiredWorkers) - amountOfActiveWorkers.get();
+            for(int i = 0; i < additionalWorkers; i++){
                 createWorker();
             }
-            System.out.println("-> WorkerHandler: need to create new" + Math.round(requiredWorkers) + " workers");
-            amountOfActiveWorkers.set((int) Math.ceil(requiredWorkers));
         }
         localsDetails.put(replyUrl, new RequestDetails(bucket, urls.length));
 
