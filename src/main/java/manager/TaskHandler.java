@@ -13,19 +13,20 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class TaskHandler {
-    private ConcurrentHashMap<String, Integer> amountOfMessagesPerLocal = new ConcurrentHashMap<String, Integer>();
-    private ConcurrentHashMap<String, HashMap<String, String>> identifiedMessages = new ConcurrentHashMap<String, HashMap<String, String>>();
+    private ConcurrentHashMap<String, RequestDetails> localsDetails = new ConcurrentHashMap<String, RequestDetails>();
+//    private ConcurrentHashMap<String, Vector<ImageOutput>> identifiedMessages = new ConcurrentHashMap<String, Vector<ImageOutput>>();
     private final Gson gson = new Gson();
     private final String amiId = "ami-0b8ae442d9a63a4f8";
     private final AtomicInteger amountOfActiveWorkers = new AtomicInteger(0);
     private final String M2W_queURL;
     private final String W2M_queURL;
     private final Ec2Client ec2;
-    ExecutorService workersListenerPool = Executors.newFixedThreadPool(1);
+    private final ExecutorService workersListenerPool = Executors.newFixedThreadPool(3);
     private final ArrayList<String> workersInstances;
     private final S3Controller s3 = new S3Controller();
     private final SQSController sqsController = new SQSController();
     private final int imagesPerWorker;
+  // private Thread workerListener;
 
     public TaskHandler(int n){
         this.imagesPerWorker = n;
@@ -36,6 +37,10 @@ public class TaskHandler {
         W2M_queURL = sqsController.createQueue("WorkersToManager" + new Date().getTime());
 
         workersInstances = new ArrayList<String>();
+
+//        this.workerListener = new Thread(listener);
+//        workerListener.start();
+
     }
 
     public void handleNewTask(TaskProtocol msg_parsed, String replyUrl){
@@ -57,9 +62,10 @@ public class TaskHandler {
 
             amountOfActiveWorkers.set((int) Math.ceil(requiredWorkers));
         }
-        amountOfMessagesPerLocal.put(replyUrl, 0);
-        identifiedMessages.put(replyUrl, new HashMap<String, String>());
-        amountOfMessagesPerLocal.replace(replyUrl, amountOfMessagesPerLocal.get(replyUrl) + urls.length);
+        localsDetails.put(replyUrl, new RequestDetails(bucket, urls.length));
+       // LocalsDetails.put(replyUrl, 0);
+      //  identifiedMessages.put(replyUrl, new Vector<ImageOutput>());
+       // localsDetails.replace(replyUrl, localsDetails.get(replyUrl) + urls.length);
 
 
         for(String imageUrl: urls){
@@ -67,9 +73,8 @@ public class TaskHandler {
             sqsController.sendMessage(M2W_queURL, gson.toJson(new TaskProtocol("new image task", imageUrl, "", replyUrl)));
 
         }
-        WorkersListener listener = new WorkersListener(amountOfActiveWorkers,W2M_queURL, amountOfMessagesPerLocal, identifiedMessages, bucket);
-        listener.run();
-        //   workersListenerPool.execute(listener);
+        WorkersListener listener = new WorkersListener(amountOfActiveWorkers,W2M_queURL, localsDetails);
+        workersListenerPool.execute(listener);
     }
 
 
@@ -118,6 +123,15 @@ public class TaskHandler {
 
     public void handleTermination() {
 
+        while (localsDetails.size() > 0){
+            try {
+                localsDetails.wait();
+            } catch (InterruptedException e) {
+                System.err.println("InterruptedException, wait()");
+            }
+        }
+
+
         //send termination to all workers
         for(int i = 0; i < amountOfActiveWorkers.get(); i++){
             sqsController.sendMessage(M2W_queURL, gson.toJson(new TaskProtocol("terminate worker", "", "", "")));
@@ -130,6 +144,11 @@ public class TaskHandler {
         } catch (InterruptedException e) {
             System.err.println(e.toString());
         }
+//        try {
+//            workerListener.join();
+//        } catch (InterruptedException e) {
+//            System.err.println("workerListener got InterruptedException");
+//        }
 
         // delete communication (sqs) between manager and workers
         sqsController.deleteQueue(M2W_queURL);

@@ -7,29 +7,27 @@ import com.google.gson.Gson;
 import software.amazon.awssdk.services.sqs.model.Message;
 
 import java.io.File;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class WorkersListener implements Runnable {
-    SQSController sqsController;
-    S3Controller s3Controller = new S3Controller();
-    String W2M_SQSQueURL;
-    ConcurrentHashMap<String, Integer> amountOfMessagesPerLocal;
-    ConcurrentHashMap<String, HashMap<String, String>> identifiedMessages;
-    String bucket;
-    Gson gson = new Gson();
+    private final SQSController sqsController;
+    private final S3Controller s3Controller = new S3Controller();
+    private final String W2M_SQSQueURL;
+    private final ConcurrentHashMap<String, RequestDetails> localsDetails;
+   // private final ConcurrentHashMap<String, Vector<ImageOutput>> identifiedMessages;
+    private final Gson gson = new Gson();
 
     AtomicInteger activeWorkersNumber;
 
-    public WorkersListener(AtomicInteger activeWorkersNumber, String W2M_SQSQueURL, ConcurrentHashMap<String, Integer> amountOfMessagesPerLocal, ConcurrentHashMap<String, HashMap<String, String>> identifiedMessages, String bucket) {
+    public WorkersListener(AtomicInteger activeWorkersNumber, String W2M_SQSQueURL, ConcurrentHashMap<String, RequestDetails> localsDetails) {
         this.activeWorkersNumber = activeWorkersNumber;
-        this.bucket = bucket;
         this.sqsController = new SQSController();
         this.W2M_SQSQueURL = W2M_SQSQueURL;
-        this.amountOfMessagesPerLocal = amountOfMessagesPerLocal;
-        this.identifiedMessages = identifiedMessages;
+        this.localsDetails = localsDetails;
+        //this.identifiedMessages = identifiedMessages;
     }
 
     @Override
@@ -46,13 +44,16 @@ public class WorkersListener implements Runnable {
                     switch(type){
                         case "done OCR task":
                             //Pair<String, String> img_identified_text = new Pair<String, String>(msg_parsed.getField1(), msg_parsed.getField2());
-                            identifiedMessages.get(replyUrl).put(msg_parsed.getField1(), msg_parsed.getField2());
+                          //  identifiedMessages.get(replyUrl).add(new ImageOutput(msg_parsed.getField1(), msg_parsed.getField2()));
                         //    identifiedMessages.get(replyUrl).add(img_identified_text);
-                            amountOfMessagesPerLocal.replace(replyUrl, amountOfMessagesPerLocal.get(replyUrl) - 1);
-                            if (amountOfMessagesPerLocal.get(replyUrl) <= 0) {
-
-                                doneTask(replyUrl, bucket);
-                                amountOfMessagesPerLocal.remove(replyUrl);
+                            //localsDetails.replace(replyUrl, localsDetails.get(replyUrl) - 1);
+                            boolean isDoneTask = localsDetails.get(replyUrl).addImageOutputAndCheckIfDone(new ImageOutput(msg_parsed.getField1(), msg_parsed.getField2()));
+                            if (isDoneTask) {
+                                doneTask(replyUrl, localsDetails.get(replyUrl).getBucket());
+                                localsDetails.remove(replyUrl);
+                                if (localsDetails.size() == 0){
+                                    localsDetails.notifyAll();
+                                }
                             }
                             break;
                         case "worker died":
@@ -70,7 +71,7 @@ public class WorkersListener implements Runnable {
     }
 
     private void doneTask(String replyUrl, String bucket) {
-        HashMap<String, String> imageData = identifiedMessages.get(replyUrl);
+        Vector<ImageOutput> imageData = localsDetails.get(replyUrl).getImageOutputs();
         File f = HTMLHandler.makeHTMLSummaryFile(imageData);
         String[] bucket_key = s3Controller.putInputInBucket(f != null ? f.getPath() : null, bucket, "summary");
 

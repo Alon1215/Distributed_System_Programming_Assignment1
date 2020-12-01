@@ -5,6 +5,7 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;  // Import the File class
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 
@@ -20,11 +21,15 @@ import java.util.List;
 
 
 public class WorkerApp {
+    private static final Tesseract tesseract = new Tesseract();
 
     public static void main(String[] args) {
         final String uniqueName = "worker" + System.currentTimeMillis();
         System.out.println(uniqueName + ": Start->");  // TODO: delete, test only
-
+        tesseract.setLanguage("eng");
+        tesseract.setOcrEngineMode(1);
+        File tessdata = LoadLibs.extractTessResources("tessdata-master");
+        tesseract.setDatapath(tessdata.getAbsolutePath());
         if (args.length < 2){
             System.err.println(uniqueName + ": Not enough arguments, Worker shut down ungracefully");
             System.exit(1);
@@ -39,6 +44,7 @@ public class WorkerApp {
     private static void workerLoop(String managerUrl, String workersQueueUrl) {
         SQSController sqs = new SQSController();
         Gson gson = new Gson();
+
         boolean isTerminated = false;
 
         while (!isTerminated) {
@@ -91,23 +97,18 @@ public class WorkerApp {
 
     public static String img2Txt(String url) {
 
-        Tesseract tesseract = new Tesseract();
-        tesseract.setLanguage("eng");
-        tesseract.setOcrEngineMode(1);
-        File tessdata = LoadLibs.extractTessResources("tessdata-master");
-        tesseract.setDatapath(tessdata.getAbsolutePath());
-
         try {
             URL url_IMG = new URL(url);
             Image image = ImageIO.read(url_IMG);
             String s = null;
             if(image == null)
-                return "";
+                return "Input file: Error OCR picture not found";
             s = tesseract.doOCR(toBufferedImage(image));
-            System.out.println("Result: " + s);
             return s;
         } catch (IOException | TesseractException e) {
-            return (e instanceof TesseractException) ? "input file: error Image not found" : "input file: error OCR";
+            return (e instanceof TesseractException) ? "Input file: error Image not found" : "Input file: error OCR";
         }
     }
+
+
 }

@@ -9,7 +9,6 @@ public class ManagerApp {
 
     public static void main(String[] args) {
       int n =Integer.parseInt(args[0]);
-//        int n = 10; // // TODO: delete later
 
     // 1. Retrieve sqs url (and create sqs client
         TaskHandler taskHandler = new TaskHandler(n);
