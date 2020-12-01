@@ -1,4 +1,4 @@
-package local;
+package shared;
 import software.amazon.awssdk.services.sqs.model.*;
 import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.CreateQueueRequest;
@@ -41,12 +41,6 @@ public class SQSController {
         return sqs.receiveMessage(receiveRequest).messages();
     }
 
-    public void deleteMessages(String queueURL, List<Message> messages){
-        for (Message m : messages) {
-            deleteSingleMessage(queueURL, m);
-        }
-    }
-
     public void deleteSingleMessage(String queueURL, Message m) {
         DeleteMessageRequest deleteRequest = DeleteMessageRequest.builder()
                 .queueUrl(queueURL)
@@ -69,6 +63,7 @@ public class SQSController {
                 .build();
         sqs.deleteQueue(deleteQueueRequest);
     }
+
     public String createQueue(String sqsName) {
         String queueUrl = "";
         try {
@@ -80,10 +75,10 @@ public class SQSController {
                 CreateQueueRequest request = CreateQueueRequest.builder()
                         .queueName(sqsName)
                         .build();
-                CreateQueueResponse create_result = sqs.createQueue(request);
+                sqs.createQueue(request);
             } catch (QueueNameExistsException e) {
                 System.err.println("SQS Error: wait 60 seconds before creating SQS queue with the name: " + sqsName);
-                throw e;
+                System.exit(-1);
             }
             GetQueueUrlRequest getQueueRequest = GetQueueUrlRequest.builder()
                     .queueName(sqsName)

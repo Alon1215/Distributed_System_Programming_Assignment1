@@ -1,4 +1,4 @@
-package local;
+package shared;
 
 public class TaskProtocol {
     private final String type; // new task / termination
@@ -32,10 +32,5 @@ public class TaskProtocol {
     @Override
     public String toString() {
         return type + "\n" + field1 + "\n" + field2 + "\n" + replyURL;
-//        return "TaskProtocol{" +
-//                "type='" + type + '\'' +
-//                ", message='" + message + '\'' +
-//                ", replyURL='" + replyURL + '\'' +
-//                '}';
     }
 }

@@ -1,6 +1,4 @@
-package local;
-// snippet-start:[s3.java2.s3_object_operations.complete]
-// snippet-start:[s3.java2.s3_object_operations.import]
+package shared;
 
 import java.io.File;
 import java.io.IOException;
@@ -8,7 +6,6 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Random;
 import java.util.Scanner;
 
 import software.amazon.awssdk.regions.Region;
@@ -31,9 +28,6 @@ public class S3Controller {
         s3.deleteObject(deleteObjectRequest);
     }
 
-
-
-                                // ------------------- Alon 12:00 added functions  ------------------- //
     public String createNewBucket(){
         String bucketName = "bucket" + System.currentTimeMillis();
 
@@ -64,7 +58,6 @@ public class S3Controller {
         try {
             bytes = Files.readAllBytes(Paths.get(path));
         } catch (IOException e) {
-            //e.printStackTrace();
             System.err.println("putInputInBucket: ERROR Input file: "+ name +" not found");
             return null;
         }
@@ -87,7 +80,6 @@ public class S3Controller {
     }
     public String[] getUrls(String bucket, String key) {
         // Get Object
-
         InputStream inputStream = s3.getObject(GetObjectRequest.builder().bucket(bucket).key(key).build(),
                 ResponseTransformer.toInputStream());
         return input2StringArr(inputStream);
@@ -96,6 +88,7 @@ public class S3Controller {
     private String[] input2StringArr(InputStream inputStream) {
         //Creating a Scanner object
         Scanner sc = new Scanner(inputStream);
+
         //Reading line by line from scanner to StringBuffer
         StringBuilder sb = new StringBuilder();
         while(sc.hasNext()){

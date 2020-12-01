@@ -1,6 +1,7 @@
 package manager;
-import local.*;
 import com.google.gson.Gson;
+import shared.SQSController;
+import shared.TaskProtocol;
 import software.amazon.awssdk.services.sqs.model.Message;
 
 import java.util.List;
@@ -8,7 +9,7 @@ import java.util.List;
 public class ManagerApp {
 
     public static void main(String[] args) {
-      int n =Integer.parseInt(args[0]);
+        int n =Integer.parseInt(args[0]);
 
     // 1. Retrieve sqs url (and create sqs client
         TaskHandler taskHandler = new TaskHandler(n);

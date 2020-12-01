@@ -3,7 +3,7 @@ package manager;
 import java.util.Vector;
 
 public class RequestDetails {
-    private final Vector<ImageOutput> imageOutputs = new Vector<ImageOutput>();
+    private final Vector<ImageOutput> imageOutputs = new Vector<>();
     private final String bucket;
     private final int amountOfUrls;
 
@@ -14,11 +14,6 @@ public class RequestDetails {
     public Vector<ImageOutput> getImageOutputs() {
         return imageOutputs;
     }
-
-    public int getAmountOfUrls() {
-        return amountOfUrls;
-    }
-
 
     public String getBucket() {
         return bucket;

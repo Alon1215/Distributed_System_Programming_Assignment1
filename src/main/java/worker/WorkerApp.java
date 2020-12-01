@@ -1,22 +1,20 @@
 package worker;
-import local.*;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;  // Import the File class
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.MalformedURLException;
 
 import com.google.gson.Gson;
 import net.sourceforge.tess4j.Tesseract;
 import net.sourceforge.tess4j.TesseractException;
 import net.sourceforge.tess4j.util.LoadLibs;
+import shared.SQSController;
+import shared.TaskProtocol;
 import software.amazon.awssdk.services.sqs.model.Message;
 
 import java.net.URL;
-import java.util.*;
 import java.util.List;
 
 
@@ -25,14 +23,13 @@ public class WorkerApp {
 
     public static void main(String[] args) {
         final String uniqueName = "worker" + System.currentTimeMillis();
-        System.out.println(uniqueName + ": Start->");  // TODO: delete, test only
         tesseract.setLanguage("eng");
         tesseract.setOcrEngineMode(1);
         File tessdata = LoadLibs.extractTessResources("tessdata-master");
         tesseract.setDatapath(tessdata.getAbsolutePath());
         if (args.length < 2){
             System.err.println(uniqueName + ": Not enough arguments, Worker shut down ungracefully");
-            System.exit(1);
+            System.exit(-1);
         }
 
         String ManagerQueueUrl = args[0]; //worker2manager queue
@@ -69,11 +66,10 @@ public class WorkerApp {
                             break;
                         default:
                             // not suppose to happen
-                            System.out.println("Bad task protocol");
+                            System.err.println("Bad task protocol");
                             break;
                     }
                     sqs.deleteSingleMessage(workersQueueUrl,msg);
-
                 }
             }
         }
@@ -84,15 +80,15 @@ public class WorkerApp {
             return (BufferedImage) img;
         }
         // Create a buffered image with transparency
-        BufferedImage bimage = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+        BufferedImage bImage = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
 
         // Draw the image on to the buffered image
-        Graphics2D bGr = bimage.createGraphics();
+        Graphics2D bGr = bImage.createGraphics();
             bGr.drawImage(img, 0, 0, null);
             bGr.dispose();
 
         // Return the buffered image
-        return bimage;
+        return bImage;
 }
 
     public static String img2Txt(String url) {
@@ -100,7 +96,7 @@ public class WorkerApp {
         try {
             URL url_IMG = new URL(url);
             Image image = ImageIO.read(url_IMG);
-            String s = null;
+            String s;
             if(image == null)
                 return "Input file: Error OCR picture not found";
             s = tesseract.doOCR(toBufferedImage(image));

@@ -1,8 +1,8 @@
 package manager;
 
 public class ImageOutput {
-    private String URL;
-    private String text;
+    private final String URL;
+    private final String text;
 
     public ImageOutput(String url, String text) {
         URL = url;

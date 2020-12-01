@@ -1,8 +1,8 @@
 package manager;
 
-import local.S3Controller;
-import local.SQSController;
-import local.TaskProtocol;
+import shared.S3Controller;
+import shared.SQSController;
+import shared.TaskProtocol;
 import com.google.gson.Gson;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.ec2.Ec2Client;
@@ -13,20 +13,19 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class TaskHandler {
-    private ConcurrentHashMap<String, RequestDetails> localsDetails = new ConcurrentHashMap<String, RequestDetails>();
-//    private ConcurrentHashMap<String, Vector<ImageOutput>> identifiedMessages = new ConcurrentHashMap<String, Vector<ImageOutput>>();
+    private final ConcurrentHashMap<String, RequestDetails> localsDetails = new ConcurrentHashMap<>();
     private final Gson gson = new Gson();
     private final String amiId = "ami-0b8ae442d9a63a4f8";
     private final AtomicInteger amountOfActiveWorkers = new AtomicInteger(0);
     private final String M2W_queURL;
     private final String W2M_queURL;
+    private final int EXECUTORS_NUMBER = 3;
+    private final ExecutorService workersListenerPool = Executors.newFixedThreadPool(EXECUTORS_NUMBER);
     private final Ec2Client ec2;
-    private final ExecutorService workersListenerPool = Executors.newFixedThreadPool(3);
     private final ArrayList<String> workersInstances;
     private final S3Controller s3 = new S3Controller();
     private final SQSController sqsController = new SQSController();
     private final int imagesPerWorker;
-  // private Thread workerListener;
 
     public TaskHandler(int n){
         this.imagesPerWorker = n;
@@ -36,17 +35,10 @@ public class TaskHandler {
         M2W_queURL = sqsController.createQueue("ManagerToWorkers" + new Date().getTime());
         W2M_queURL = sqsController.createQueue("WorkersToManager" + new Date().getTime());
 
-        workersInstances = new ArrayList<String>();
-
-//        this.workerListener = new Thread(listener);
-//        workerListener.start();
-
+        workersInstances = new ArrayList<>();
     }
 
     public void handleNewTask(TaskProtocol msg_parsed, String replyUrl){
-        //TODO: Debug only:
-        System.out.println("-> Workers2Manager: " + W2M_queURL);
-
         String bucket = msg_parsed.getField1();
         String key = msg_parsed.getField2();
         String[] urls = s3.getUrls(bucket, key);
@@ -58,15 +50,9 @@ public class TaskHandler {
                 createWorker();
             }
             System.out.println("-> WorkerHandler: need to create new" + Math.round(requiredWorkers) + " workers");
-            System.out.println("DEBUG: " + W2M_queURL + " " + M2W_queURL);
-
             amountOfActiveWorkers.set((int) Math.ceil(requiredWorkers));
         }
         localsDetails.put(replyUrl, new RequestDetails(bucket, urls.length));
-       // LocalsDetails.put(replyUrl, 0);
-      //  identifiedMessages.put(replyUrl, new Vector<ImageOutput>());
-       // localsDetails.replace(replyUrl, localsDetails.get(replyUrl) + urls.length);
-
 
         for(String imageUrl: urls){
 
@@ -115,7 +101,7 @@ public class TaskHandler {
                     instanceId, amiId);
         } catch (Ec2Exception e) {
             System.err.println(e.getMessage());
-            System.exit(1);
+            System.exit(-1);
         }
         System.out.println("Done!");
 
@@ -144,11 +130,6 @@ public class TaskHandler {
         } catch (InterruptedException e) {
             System.err.println(e.toString());
         }
-//        try {
-//            workerListener.join();
-//        } catch (InterruptedException e) {
-//            System.err.println("workerListener got InterruptedException");
-//        }
 
         // delete communication (sqs) between manager and workers
         sqsController.deleteQueue(M2W_queURL);
@@ -162,12 +143,11 @@ public class TaskHandler {
     }
 
     public void terminateEC2ById(String instanceId) {
+
         try {
-
-
             TerminateInstancesRequest request = TerminateInstancesRequest.builder()
                     .instanceIds(instanceId).build();
-            TerminateInstancesResponse response = ec2.terminateInstances(request);
+            ec2.terminateInstances(request);
             System.out.println("MANAGER: Terminated Worker: " + instanceId);
 
         } catch (Exception e){

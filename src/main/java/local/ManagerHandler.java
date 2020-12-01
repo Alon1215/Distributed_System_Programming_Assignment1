@@ -1,5 +1,6 @@
 package local;
 
+import shared.SQSController;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.ec2.Ec2Client;
 import software.amazon.awssdk.services.ec2.model.*;
@@ -8,12 +9,12 @@ import java.util.Base64;
 import java.util.List;
 
 public class ManagerHandler {
-    private SQSController sqs = new SQSController();
+    private final SQSController sqs = new SQSController();
     private final Ec2Client ec2;
     private final String name = "manager";
     private final String amiId = "ami-0b8ae442d9a63a4f8";
     private String instanceId;
-    private String sqsURL;
+    private final String sqsURL;
 
     public ManagerHandler(int n_input) {
         // create ec2 clients
@@ -32,7 +33,6 @@ public class ManagerHandler {
         else{
             System.out.println("Manager already exist");
 
-            // TODO: ALON 14.11:
             this.sqsURL = sqs.getQueueURLByName("Local2Manager");
         }
     }
@@ -46,7 +46,7 @@ public class ManagerHandler {
             List<Instance> instanceList = reservation.instances();
             //Now on each instance you can call
             for (Instance instance : instanceList) {
-                if (instance.state().name() != InstanceStateName.TERMINATED) { // @TODO: Alon 12:00 : why not RUNNING?
+                if (instance.state().name() != InstanceStateName.TERMINATED) {
                     List<Tag> tags = instance.tags();
                     for (Tag tag : tags) {
                         if (tag.value().equals(name)){
@@ -81,7 +81,6 @@ public class ManagerHandler {
 
         RunInstancesResponse response = ec2.runInstances(runRequest);
 
-//        String instanceId = response.instances().get(0).instanceId();
         this.instanceId = response.instances().get(0).instanceId();
 
         Tag tag = Tag.builder()

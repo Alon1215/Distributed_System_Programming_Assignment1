@@ -1,6 +1,9 @@
 package local;
 
 import com.google.gson.Gson;
+import shared.S3Controller;
+import shared.SQSController;
+import shared.TaskProtocol;
 import software.amazon.awssdk.services.sqs.model.Message;
 
 import java.util.Arrays;
@@ -13,26 +16,17 @@ public class LocalApp {
 
         if (args.length < 3){
             System.out.println("To few arguments, program terminate");
-            System.exit(1);
+            System.exit(-1);
         }
         String inputFileName = args[0];
         String outputFileName = args[1];
         int n_input = Integer.parseInt(args[2]);
         boolean isTerminating = (args.length == 4 && args[3].equals("terminate"));
 
-        /*
-        String inputFileName = "input1task.txt";
-        String outputFileName = "output" + System.currentTimeMillis();
-        int n_input = 10; // TODO: delete later
-        */
-
-
     // 1. Check if manager node is active (if not, initiate)
 
         ManagerHandler manager = new ManagerHandler(n_input); // create new manager if doesn't exist, else represents current one
         // check which parameters are needed
-
-
 
     // 2. Upload input file to S3
         S3Controller s3 = new S3Controller();
@@ -43,7 +37,6 @@ public class LocalApp {
             System.err.println("upload failed, exit ungracefully");
             System.exit(-1);
         }
-        System.out.println(Arrays.toString(bucket_key)); // TODO: delete, test only
 
     // 3. Sends a message to an SQS queue, stating the location of the file on S3
 

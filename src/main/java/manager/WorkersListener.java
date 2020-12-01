@@ -1,8 +1,8 @@
 package manager;
 
-import local.S3Controller;
-import local.SQSController;
-import local.TaskProtocol;
+import shared.S3Controller;
+import shared.SQSController;
+import shared.TaskProtocol;
 import com.google.gson.Gson;
 import software.amazon.awssdk.services.sqs.model.Message;
 
@@ -17,7 +17,6 @@ public class WorkersListener implements Runnable {
     private final S3Controller s3Controller = new S3Controller();
     private final String W2M_SQSQueURL;
     private final ConcurrentHashMap<String, RequestDetails> localsDetails;
-   // private final ConcurrentHashMap<String, Vector<ImageOutput>> identifiedMessages;
     private final Gson gson = new Gson();
 
     AtomicInteger activeWorkersNumber;
@@ -43,10 +42,6 @@ public class WorkersListener implements Runnable {
 
                     switch(type){
                         case "done OCR task":
-                            //Pair<String, String> img_identified_text = new Pair<String, String>(msg_parsed.getField1(), msg_parsed.getField2());
-                          //  identifiedMessages.get(replyUrl).add(new ImageOutput(msg_parsed.getField1(), msg_parsed.getField2()));
-                        //    identifiedMessages.get(replyUrl).add(img_identified_text);
-                            //localsDetails.replace(replyUrl, localsDetails.get(replyUrl) - 1);
                             boolean isDoneTask = localsDetails.get(replyUrl).addImageOutputAndCheckIfDone(new ImageOutput(msg_parsed.getField1(), msg_parsed.getField2()));
                             if (isDoneTask) {
                                 doneTask(replyUrl, localsDetails.get(replyUrl).getBucket());
@@ -62,6 +57,7 @@ public class WorkersListener implements Runnable {
                             break;
                         default:
                             // not suppose to happen
+                            System.err.println("Bad message from worker");
                             break;
                     }
                     sqsController.deleteSingleMessage(W2M_SQSQueURL, msg);
@@ -72,7 +68,7 @@ public class WorkersListener implements Runnable {
 
     private void doneTask(String replyUrl, String bucket) {
         Vector<ImageOutput> imageData = localsDetails.get(replyUrl).getImageOutputs();
-        File f = HTMLHandler.makeHTMLSummaryFile(imageData);
+        File f = HTMLHandler.generateHtmlFile(imageData);
         String[] bucket_key = s3Controller.putInputInBucket(f != null ? f.getPath() : null, bucket, "summary");
 
         Gson gson = new Gson();
