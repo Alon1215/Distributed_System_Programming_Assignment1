@@ -7,9 +7,9 @@ import java.util.Vector;
 
 public class HTMLHandler {
 
-    public static File generateHtmlFile(Vector<ImageOutput> urlsToText){
+    public static void generateHtmlFile(Vector<ImageOutput> urlsToText, String name){
 
-        File f = new File("summary" + System.currentTimeMillis() +".html");
+        File f = new File(name +".html");
         try{
             BufferedWriter bw = new BufferedWriter(new FileWriter(f));
             bw.write("<html>\n\t<head>\n\t<meta http-equiv=\"Content-Type\" content=\"text/html; charset=windows-1252\"><title>OCR</title>\n\t</head>\n\t<body>\n");
@@ -25,10 +25,8 @@ public class HTMLHandler {
             }
             bw.write("\t</body>\n</html>");
             bw.close();
-            return f;
         }catch (IOException e){
             System.err.println("problem with io");
-            return null;
         }
     }
 

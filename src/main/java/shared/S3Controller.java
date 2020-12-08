@@ -6,8 +6,16 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Scanner;
+import java.util.Vector;
 
+import com.google.gson.Gson;
+import javafx.scene.effect.ImageInput;
+import manager.HTMLHandler;
+import manager.ImageOutput;
+import manager.RequestDetails;
+import software.amazon.awssdk.core.ResponseBytes;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
@@ -72,12 +80,43 @@ public class S3Controller {
 
     }
 
+    public String[] putOutputInBucket(RequestDetails requestDetails, String bucketName, String name){
+        String keyName = name + System.currentTimeMillis();
+
+        Gson gson = new Gson();
+        String jsoned = gson.toJson(requestDetails);
+        // convert path to file / byte buffer
+        byte[] bytes = jsoned.getBytes();
+        ByteBuffer buffer = ByteBuffer.wrap(bytes);
+
+        // Put Object
+        s3.putObject(PutObjectRequest.builder().bucket(bucketName).key(keyName)
+                        .build(),
+                RequestBody.fromByteBuffer(buffer));
+        return new String[]{bucketName, keyName};
+    }
 
     public void downloadSummaryFile(String bucket, String key, String outputName){
-        File summary = new File(outputName + ".html");
-        s3.getObject(GetObjectRequest.builder().bucket(bucket).key(key).build(),
-                ResponseTransformer.toFile(summary));
+        byte[] res = s3.getObject(GetObjectRequest.builder().bucket(bucket).key(key).build(),
+                ResponseTransformer.toBytes()).asByteArray();
+
+      //  String jsonRes = Arrays.toString(res);
+        String jsonRes = new String(res);
+        Gson gson = new Gson();
+
+        RequestDetails requestDetails = gson.fromJson(jsonRes, RequestDetails.class);
+
+        HTMLHandler.generateHtmlFile(requestDetails.getImageOutputs(), outputName);
+
     }
+
+
+//    public void downloadSummaryFile(String bucket, String key, String outputName){
+//        File summary = new File(outputName + ".html");
+//        s3.getObject(GetObjectRequest.builder().bucket(bucket).key(key).build(),
+//                ResponseTransformer.toFile(summary));
+//    }
+
     public String[] getUrls(String bucket, String key) {
         // Get Object
         InputStream inputStream = s3.getObject(GetObjectRequest.builder().bucket(bucket).key(key).build(),

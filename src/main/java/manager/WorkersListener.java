@@ -44,7 +44,9 @@ public class WorkersListener implements Runnable {
                         case "done OCR task":
                             boolean isDoneTask = localsDetails.get(replyUrl).addImageOutputAndCheckIfDone(new ImageOutput(msg_parsed.getField1(), msg_parsed.getField2()));
                             if (isDoneTask) {
+//                                doneTask(replyUrl, localsDetails.get(replyUrl).getBucket());
                                 doneTask(replyUrl, localsDetails.get(replyUrl).getBucket());
+
                                 localsDetails.remove(replyUrl);
                                 if (localsDetails.size() == 0){
                                     localsDetails.notifyAll();
@@ -66,11 +68,20 @@ public class WorkersListener implements Runnable {
         }
     }
 
-    private void doneTask(String replyUrl, String bucket) {
-        Vector<ImageOutput> imageData = localsDetails.get(replyUrl).getImageOutputs();
-        File f = HTMLHandler.generateHtmlFile(imageData);
-        String[] bucket_key = s3Controller.putInputInBucket(f != null ? f.getPath() : null, bucket, "summary");
+//    private void doneTask(String replyUrl, String bucket) {
+//        Vector<ImageOutput> imageData = localsDetails.get(replyUrl).getImageOutputs();
+//        File f = HTMLHandler.generateHtmlFile(imageData);
+//        String[] bucket_key = s3Controller.putInputInBucket(f != null ? f.getPath() : null, bucket, "summary");
+//
+//        Gson gson = new Gson();
+//        sqsController.sendMessage(replyUrl, gson.toJson(new TaskProtocol("done task", bucket_key[0], bucket_key[1], "")));
+//    }
 
+
+    private void doneTask(String replyUrl, String bucket) {
+        RequestDetails requestDetails = localsDetails.get(replyUrl);
+
+        String[] bucket_key = s3Controller.putOutputInBucket(requestDetails, bucket, "summary");
         Gson gson = new Gson();
         sqsController.sendMessage(replyUrl, gson.toJson(new TaskProtocol("done task", bucket_key[0], bucket_key[1], "")));
     }

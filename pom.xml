@@ -7,7 +7,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <groupId>org.example</groupId>
-    <artifactId>ManagerApp</artifactId>
+    <artifactId>LocalApp</artifactId>
     <version>1.0</version>
     <build>
 
@@ -36,7 +36,7 @@
                             <archive>
                                 <manifest>
                                     <mainClass>
-                                        manager.ManagerApp
+                                        local.LocalApp
                                     </mainClass>
                                 </manifest>
                             </archive>
