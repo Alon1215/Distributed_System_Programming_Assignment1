@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Manager logic, and main class of ManagerApp.jar, which runs in the cloud.
- * Manager Listens to sqs queue feeded by Local Apps, and receives their input files.
+ * Manager Listens to sqs queue fed by Local Apps, and receives their input files.
  * Manager is responsible for creating Workers, send them tasks, and parse their output to response for
  * the local request.
  */
@@ -21,14 +21,13 @@ public class ManagerApp {
      * If a new task arrive, handle the "new task" process,
      * If a termination message arrive, wait() until all workers finish their job,
      * terminate them, and them finish it's running (terminate itself).
-     * @param args arguments recieved from LocalApp (specifically, n - number of picture per worker)
+     * @param args arguments received from LocalApp (specifically, n - number of picture per worker)
      */
     public static void main(String[] args) {
-        int n = Integer.parseInt(args[0]);
         AtomicBoolean terminateSwitch = new AtomicBoolean(false);
 
         // 1. Retrieve sqs url (and create sqs client
-        TaskHandler taskHandler = new TaskHandler(n, terminateSwitch);
+        TaskHandler taskHandler = new TaskHandler(terminateSwitch);
         SQSController sqsManager = new SQSController();
         String sqsManagerURL = sqsManager.getQueueURLByName("Local2Manager");
         String managerInstanceId = "";
@@ -45,13 +44,13 @@ public class ManagerApp {
                     TaskProtocol msg_parsed = gson.fromJson(msg.body(),TaskProtocol.class);
                     String type = msg_parsed.getType();
                     String replyUrl = msg_parsed.getReplyURL();
-
+                    int workersPerImage = msg_parsed.getNPerWorker();
                     System.out.println("Local2Manager: message received! type: " + msg_parsed.getType());
 
                     switch (type) {
                         case "new task":
 
-                            taskHandler.handleNewTask(msg_parsed, replyUrl);
+                            taskHandler.handleNewTask(msg_parsed, replyUrl, workersPerImage);
                             break;
                         case "terminate":
                             System.out.println("terminateSwitch -> true");

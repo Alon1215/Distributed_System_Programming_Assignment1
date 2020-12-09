@@ -16,7 +16,7 @@ public class ManagerHandler {
     private String instanceId;
     private final String sqsURL;
 
-    public ManagerHandler(int n_input) {
+    public ManagerHandler() {
         // create ec2 clients
         ec2 = Ec2Client.builder()
                 .region(Region.US_EAST_1)
@@ -24,7 +24,7 @@ public class ManagerHandler {
 
         // create new instance (if needed) & set sqs url
         if (!checkIfManagerExist()) {
-            createInstance(n_input);
+            createInstance();
             System.out.println("Finished making a Manager");
 
             this.sqsURL = this.sqs.createQueue("Local2Manager");
@@ -64,12 +64,12 @@ public class ManagerHandler {
      * Create EC2 for manager node & create new sqs queue for local to manager communication
      * (manager listen to queue)
      */
-    public void createInstance(int n_input){
+    public void createInstance(){
 
         final String USAGE =
                 "#!/bin/bash\n" +
                         "wget https://alontomdsp211.s3.amazonaws.com/ManagerApp.jar\n" +
-                        "java -jar ManagerApp.jar " + n_input + "\n";
+                        "java -jar ManagerApp.jar\n";
         IamInstanceProfileSpecification role = IamInstanceProfileSpecification.builder().arn("arn:aws:iam::119201439262:instance-profile/ManagerDSP211AT").build();
         RunInstancesRequest runRequest = RunInstancesRequest.builder()
                 .instanceType(InstanceType.T2_SMALL)

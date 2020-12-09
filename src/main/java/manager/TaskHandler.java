@@ -26,7 +26,6 @@ public class TaskHandler {
     private static final ConcurrentHashMap<String, RequestDetails> localsDetails = new ConcurrentHashMap<>();
     private static final AtomicInteger amountOfActiveWorkers = new AtomicInteger(0);
     private static final ArrayList<String> workersInstances = new ArrayList<>();
-    private final int imagesPerWorker;
     private static final Gson gson = new Gson();
     /* AWS tools and properties */
     private static final String amiId = "ami-0b8ae442d9a63a4f8";
@@ -40,8 +39,7 @@ public class TaskHandler {
     private final Thread[] workersListenerPool;
 
 
-    public TaskHandler(int n, AtomicBoolean isTerminated){
-        this.imagesPerWorker = n;
+    public TaskHandler(AtomicBoolean isTerminated){
 
         ec2 = Ec2Client.builder()
                 .region(Region.US_EAST_1)
@@ -67,7 +65,7 @@ public class TaskHandler {
      * @param msg_parsed "new task" message parsed to the protocol
      * @param replyUrl Local's queue to be responded with the result.
      */
-    public void handleNewTask(TaskProtocol msg_parsed, String replyUrl){
+    public void handleNewTask(TaskProtocol msg_parsed, String replyUrl, int imagesPerWorker){
         String bucket = msg_parsed.getField1();
         String key = msg_parsed.getField2();
         String[] urls = s3.getUrls(bucket, key);

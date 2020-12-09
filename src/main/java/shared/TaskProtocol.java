@@ -1,7 +1,7 @@
 package shared;
 
 /**
- * Task / message protocol of the communication in our program.
+ * Task / message protocol of the communication in our program, handling an existing task.
  * contain:
  * message  header
  * 2 fields of information,
@@ -15,14 +15,22 @@ public class TaskProtocol {
     private final String field1;
     private final String field2;
     private final String replyURL;
+    private final int nPerWorker;
 
     public TaskProtocol(String type, String field1, String field2, String replyURL) {
         this.type = type;
         this.field1 = field1;
         this.field2 = field2;
         this.replyURL = replyURL;
+        this.nPerWorker = 0;
     }
-
+    public TaskProtocol(String type, String field1, String field2, String replyURL, int nPerWorker) {
+        this.type = type;
+        this.field1 = field1;
+        this.field2 = field2;
+        this.replyURL = replyURL;
+        this.nPerWorker = nPerWorker;
+    }
     public String getType() {
         return type;
     }
@@ -38,6 +46,11 @@ public class TaskProtocol {
     public String getReplyURL() {
         return replyURL;
     }
+
+    public int getNPerWorker() {
+        return nPerWorker;
+    }
+
 
     @Override
     public String toString() {

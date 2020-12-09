@@ -6,7 +6,6 @@ import shared.SQSController;
 import shared.TaskProtocol;
 import software.amazon.awssdk.services.sqs.model.Message;
 
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -25,7 +24,7 @@ public class LocalApp {
         System.out.println("Start LocalApp -> n = " + n_input+ ", isTerminate = " + isTerminating);
         // 1. Check if manager node is active (if not, initiate)
 
-        ManagerHandler manager = new ManagerHandler(n_input); // create new manager if doesn't exist, else represents current one
+        ManagerHandler manager = new ManagerHandler(); // create new manager if doesn't exist, else represents current one
         // check which parameters are needed
 
         // 2. Upload input file to S3
@@ -47,7 +46,7 @@ public class LocalApp {
 
         // 3.2 Sends a message to an SQS queue
         Gson gson = new Gson();
-        sqsLocal.sendMessage(manager.getQueueURL(), gson.toJson(new TaskProtocol("new task",bucket_key[0], bucket_key[1], sqsLocalURL)));
+        sqsLocal.sendMessage(manager.getQueueURL(), gson.toJson(new TaskProtocol("new task",bucket_key[0], bucket_key[1], sqsLocalURL, n_input)));
 
         // 4. Checks an SQS queue for a message indicating the process is done and the response (the summary file) is available on S3.
         sqsLocal.getMessages(sqsLocalURL);
