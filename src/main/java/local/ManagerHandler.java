@@ -68,8 +68,8 @@ public class ManagerHandler {
 
         final String USAGE =
                 "#!/bin/bash\n" +
-                "wget https://alontomdsp211.s3.amazonaws.com/ManagerApp.jar\n" +
-                "java -jar ManagerApp.jar " + n_input + "\n";
+                        "wget https://alontomdsp211.s3.amazonaws.com/ManagerApp.jar\n" +
+                        "java -jar ManagerApp.jar " + n_input + "\n";
         IamInstanceProfileSpecification role = IamInstanceProfileSpecification.builder().arn("arn:aws:iam::119201439262:instance-profile/ManagerDSP211AT").build();
         RunInstancesRequest runRequest = RunInstancesRequest.builder()
                 .instanceType(InstanceType.T2_SMALL)

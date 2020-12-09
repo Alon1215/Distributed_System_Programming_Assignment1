@@ -17,10 +17,22 @@ import software.amazon.awssdk.services.sqs.model.Message;
 import java.net.URL;
 import java.util.List;
 
-
+/**
+ * Main class of WorkerApp.jar, which run in the cloud.
+ * Listen to manager's tasks for the workers.
+ * process a given OCR task, and return a result for the given task.
+ * Programed to overcome OCR and IO exceptions, and implement the main task of the program,
+ * which is to process Text from images (OCR in the cloud).
+ */
 public class WorkerApp {
     private static final Tesseract tesseract = new Tesseract();
 
+    /**
+     * Main method.
+     * Initiate Worker's activity,
+     * afterward run workers loop.
+     * @param args args contain the urls of the manager and workers queue.
+     */
     public static void main(String[] args) {
         final String uniqueName = "worker" + System.currentTimeMillis();
         tesseract.setLanguage("eng");
@@ -38,6 +50,14 @@ public class WorkerApp {
 
     }
 
+    /**
+     * Main loop of the worker.
+     * listen to manager's messages for the workers.
+     * if a new OCR task arrive - process the task
+     * else, a termination message received, response properly and finish run.
+     * @param managerUrl  Workers2Manager queue
+     * @param workersQueueUrl Manager2Workers queue
+     */
     private static void workerLoop(String managerUrl, String workersQueueUrl) {
         SQSController sqs = new SQSController();
         Gson gson = new Gson();
@@ -75,6 +95,11 @@ public class WorkerApp {
         }
     }
 
+    /**
+     * Convert image to buffered image/
+     * @param img given Image
+     * @return Buffered image
+     */
     public static BufferedImage toBufferedImage(Image img) {
         if (img instanceof BufferedImage) {
             return (BufferedImage) img;
@@ -84,13 +109,21 @@ public class WorkerApp {
 
         // Draw the image on to the buffered image
         Graphics2D bGr = bImage.createGraphics();
-            bGr.drawImage(img, 0, 0, null);
-            bGr.dispose();
+        bGr.drawImage(img, 0, 0, null);
+        bGr.dispose();
 
         // Return the buffered image
         return bImage;
-}
+    }
 
+    /**
+     * Process for a given url, the text within it.
+     * Thus, convert the url to an input for the OCR,
+     * handle exceptions,
+     * and response with the text suited for the given url
+     * @param url urk of an image
+     * @return text - within the picture / exception description
+     */
     public static String img2Txt(String url) {
 
         try {

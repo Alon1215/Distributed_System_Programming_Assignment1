@@ -7,9 +7,17 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <groupId>org.example</groupId>
-    <artifactId>LocalApp</artifactId>
+    <artifactId>WorkerApp</artifactId>
     <version>1.0</version>
     <build>
+        <resources>
+            <resource>
+                <directory>.</directory>
+                <includes>
+                    <include>tessdata-master/**/*.*</include>
+                </includes>
+            </resource>
+        </resources>
 
         <plugins>
             <plugin>
@@ -36,7 +44,7 @@
                             <archive>
                                 <manifest>
                                     <mainClass>
-                                        local.LocalApp
+                                        worker.WorkerApp
                                     </mainClass>
                                 </manifest>
                             </archive>
@@ -64,6 +72,11 @@
     </dependencyManagement>
 
     <dependencies>
+        <dependency>
+            <groupId>io.symphonia</groupId>
+            <artifactId>lambda-logging</artifactId>
+            <version>1.0.0</version>
+        </dependency>
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>ec2</artifactId>

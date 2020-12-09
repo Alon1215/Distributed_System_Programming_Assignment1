@@ -7,7 +7,13 @@ import java.util.Vector;
 
 public class HTMLHandler {
 
-    public static void generateHtmlFile(Vector<ImageOutput> urlsToText, String name){
+    /**
+     * Generate the output file, anHTML contains the pictures and the text obtained by the OCR
+     * @param urlsToText Vector of the the resuls, which contains url and the text within it
+     * @param name name of the output file (as described in the assignment
+     * @return HTML file, output of the assignment
+     */
+    public static File generateHtmlFile(Vector<ImageOutput> urlsToText, String name){
 
         File f = new File(name +".html");
         try{
@@ -25,8 +31,10 @@ public class HTMLHandler {
             }
             bw.write("\t</body>\n</html>");
             bw.close();
+            return f;
         }catch (IOException e){
             System.err.println("problem with io");
+            return null;
         }
     }
 

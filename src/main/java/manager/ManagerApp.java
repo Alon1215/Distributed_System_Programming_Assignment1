@@ -5,23 +5,39 @@ import shared.TaskProtocol;
 import software.amazon.awssdk.services.sqs.model.Message;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
+/**
+ * Manager logic, and main class of ManagerApp.jar, which runs in the cloud.
+ * Manager Listens to sqs queue feeded by Local Apps, and receives their input files.
+ * Manager is responsible for creating Workers, send them tasks, and parse their output to response for
+ * the local request.
+ */
 public class ManagerApp {
 
+    /**
+     * main function of the manager.
+     * Listen to locals2Manager queue,
+     * If a new task arrive, handle the "new task" process,
+     * If a termination message arrive, wait() until all workers finish their job,
+     * terminate them, and them finish it's running (terminate itself).
+     * @param args arguments recieved from LocalApp (specifically, n - number of picture per worker)
+     */
     public static void main(String[] args) {
-        int n =Integer.parseInt(args[0]);
+        int n = Integer.parseInt(args[0]);
+        AtomicBoolean terminateSwitch = new AtomicBoolean(false);
 
-    // 1. Retrieve sqs url (and create sqs client
-        TaskHandler taskHandler = new TaskHandler(n);
+        // 1. Retrieve sqs url (and create sqs client
+        TaskHandler taskHandler = new TaskHandler(n, terminateSwitch);
         SQSController sqsManager = new SQSController();
         String sqsManagerURL = sqsManager.getQueueURLByName("Local2Manager");
         String managerInstanceId = "";
 
-    // 2. Manager listen to his sqs queue
+        // 2. Manager listen to his sqs queue
+        System.out.println("-> Start Listen to queue: " + sqsManagerURL);
         Gson gson = new Gson();
-        boolean isTerminated = false;
-
-        while (!isTerminated) {
+        boolean isDone = false;
+        while (!isDone){
             List<Message> messages = sqsManager.getMessages(sqsManagerURL);
             for( Message msg : messages) {
                 if(msg != null) {
@@ -30,25 +46,20 @@ public class ManagerApp {
                     String type = msg_parsed.getType();
                     String replyUrl = msg_parsed.getReplyURL();
 
+                    System.out.println("Local2Manager: message received! type: " + msg_parsed.getType());
+
                     switch (type) {
                         case "new task":
-                            // 2.1 If the message is that of a new task it:
-                                // 2.1.1 The manager should create a worker for every n messages, if there are no running workers.
-                                // 2.1.2 If there are k active workers, and the new job requires m workers, then the manager should create m-k new workers, if possible.
-                                // 2.1.3 Note that while the manager creates a node for every n messages, it does not delegate messages to specific nodes. All of the worker nodes take their messages from the same SQS queue; so it might be the case that with 2n messages, hence two worker nodes, one node processed n+(n/2) messages, while the other processed only n/2.
 
                             taskHandler.handleNewTask(msg_parsed, replyUrl);
                             break;
                         case "terminate":
-                            // 2.2 If the message is a termination message, then the manager:
-                                // 2.2.1 Does not accept any more input files from local applications.
-                                // 2.2.2 Waits for all the workers to finish their job, and then terminates them.
-                                // 2.2.3 Creates response messages for the jobs, if needed.
-                                // 2.2.4 Terminates
+                            System.out.println("terminateSwitch -> true");
+                            terminateSwitch.set(true);
 
                             managerInstanceId = msg_parsed.getField1();
-                            taskHandler.handleTermination();
-                            isTerminated = true;
+                            taskHandler.WaitForListenersTermination();
+                            isDone = true;
                             break;
                         default:
                             System.err.println("Manager received bad task from local");
@@ -56,18 +67,13 @@ public class ManagerApp {
                     }
                     sqsManager.deleteSingleMessage(sqsManagerURL, msg);
                 }
-
-
-
-
             }
-
         }
         sqsManager.deleteQueue(sqsManagerURL);
 
 
         // Terminate Manager's EC2 and finish
-        taskHandler.terminateEC2ById(managerInstanceId);
+        TaskHandler.terminateEC2ById(managerInstanceId);
     }
 
 }

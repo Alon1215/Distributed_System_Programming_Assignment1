@@ -1,5 +1,15 @@
 package shared;
 
+/**
+ * Task / message protocol of the communication in our program.
+ * contain:
+ * message  header
+ * 2 fields of information,
+ * and reply url.
+ *
+ * Mainly will be parsed to/ from Json,
+ * and give us unified communication throughout the program.
+ */
 public class TaskProtocol {
     private final String type; // new task / termination
     private final String field1;

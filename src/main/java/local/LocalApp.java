@@ -22,13 +22,13 @@ public class LocalApp {
         String outputFileName = args[1];
         int n_input = Integer.parseInt(args[2]);
         boolean isTerminating = (args.length == 4 && args[3].equals("terminate"));
-
-    // 1. Check if manager node is active (if not, initiate)
+        System.out.println("Start LocalApp -> n = " + n_input+ ", isTerminate = " + isTerminating);
+        // 1. Check if manager node is active (if not, initiate)
 
         ManagerHandler manager = new ManagerHandler(n_input); // create new manager if doesn't exist, else represents current one
         // check which parameters are needed
 
-    // 2. Upload input file to S3
+        // 2. Upload input file to S3
         S3Controller s3 = new S3Controller();
         String bucketName = s3.createNewBucket();
         String[] bucket_key = s3.putInputInBucket(inputFileName,bucketName, "inputFileName");
@@ -38,19 +38,20 @@ public class LocalApp {
             System.exit(-1);
         }
 
-    // 3. Sends a message to an SQS queue, stating the location of the file on S3
+        // 3. Sends a message to an SQS queue, stating the location of the file on S3
 
-    // 3.1 create SQS for local2manager & manager2local
+        // 3.1 create SQS for local2manager & manager2local
         SQSController sqsLocal = new SQSController();
         String sqsLocalURL = sqsLocal.createQueue("local" + new Date().getTime());
         System.out.println("-> sqsLocal created");
 
-    // 3.2 Sends a message to an SQS queue
+        // 3.2 Sends a message to an SQS queue
         Gson gson = new Gson();
         sqsLocal.sendMessage(manager.getQueueURL(), gson.toJson(new TaskProtocol("new task",bucket_key[0], bucket_key[1], sqsLocalURL)));
 
-    // 4. Checks an SQS queue for a message indicating the process is done and the response (the summary file) is available on S3.
+        // 4. Checks an SQS queue for a message indicating the process is done and the response (the summary file) is available on S3.
         sqsLocal.getMessages(sqsLocalURL);
+        System.out.println("-> Start Listen to queue: " + sqsLocalURL);
 
         boolean isDone = false;
         while(!isDone){
@@ -61,14 +62,16 @@ public class LocalApp {
                     TaskProtocol msg_parsed = gson.fromJson(msg.body(),TaskProtocol.class);
                     String type = msg_parsed.getType();
 
-    // 4.1 Downloads the summary file from S3, and create an html file representing the results.
+                    System.out.println("message received! type: " + msg_parsed.getType());
+                    // 4.1 Downloads the summary file from S3, and create an html file representing the results.
                     if (type.equals("done task")) {
 
                         // Download summary file, clean & delete bucket
                         processTaskOutput(outputFileName, s3, bucketName, bucket_key[1], msg_parsed);
 
-    // 4.2 Sends a termination message to the Manager if it was supplied as one of its input arguments.
+                        // 4.2 Sends a termination message to the Manager if it was supplied as one of its input arguments.
                         if (isTerminating){
+                            System.out.println("Send terminate to manager");
                             sqsLocal.sendMessage(manager.getQueueURL(), gson.toJson(new TaskProtocol("terminate",manager.getInstanceId(), "", "")));
                         }
                         isDone = true;
