@@ -9,8 +9,21 @@ import software.amazon.awssdk.services.sqs.model.Message;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * Local application logic, and main class of LocalApp.jar, which is the local application of our assignment.
+ * to run the local application: java -jar LocalApp <inputFileName> <outputFileName> <n> ?<terminate>
+ * such as file names are input/ file names, n is number of pictures per worker, and add termination if local responsible for manager termination.
+ */
 public class LocalApp {
 
+    /**
+     * Main function and logic of the LocalApp.
+     * LocalApp upload input file to S3, and send manager a new task mission (with the specified n).
+     * Afterwards listen to it's queue for result.
+     * After receiving the output summary file, if needed, send 'terminate' message,
+     * process summary file to HTML and finish run.
+     * @param args =  <inputFileName> <outputFileName> <n> ?<terminate>
+     */
     public static void main(String[] args) {
 
         if (args.length < 3){
@@ -86,6 +99,14 @@ public class LocalApp {
 
     }
 
+    /**
+     * Processes output received from the manager.
+     * @param outputFileName name of the output name (given as an argument).
+     * @param s3 S3 client
+     * @param bucketName bucket name where summary file was uploaded.
+     * @param inputKey1 key name of summary file.
+     * @param msg_parsed the message from the manager, parsed to the message protocol
+     */
     private static void processTaskOutput(String outputFileName, S3Controller s3, String bucketName, String inputKey1, TaskProtocol msg_parsed) {
         String outputKey = msg_parsed.getField2();
         System.out.println("Summary file received");
